@@ -14,7 +14,7 @@ let bettingState = 'closed';
 
 const PREFIX = '$';
 
-const bot = new eris.Client('NjMxNjA1MDkzNDkzNjM3MTMy.Xajkkw.CWFi088fQleilwfhyMsQCIF5pKA');
+const bot = new eris.Client('NjMxNjA1MDkzNDkzNjM3MTMy.XajmAQ.gi2DFcCblsvyCFRLMag6FxPSLTY');
 
 bot.on("ready", () => {
     console.log("Ready!");

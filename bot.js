@@ -1,5 +1,10 @@
 const eris = require('eris');
 const fs = require("fs");
+const express = require('express');
+
+const PORT = process.env.PORT || 5000
+
+express().listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 // const { BOT_OWNER_ID, BOT_TOKEN, LOG_CHANNEL_ID } = require('../config.json');
 

@@ -66,13 +66,13 @@ commandForName['bet'] = {
 
     if (userRecord) {
       if (userRecord.amount <= 0) {
-        return msg.channel.createMessage(`You have no ${user.currencyType} left.`);
+        return msg.channel.createMessage(`You have no ${user.currency} left.`);
       }
 
       const existingFunds = userRecord.amount;
 
       if (!existingFunds || existingFunds < betAmount) {
-        return msg.channel.createMessage(`You are broke, no ${users[userIndex].currencyType} left`);
+        return msg.channel.createMessage(`You are broke, no ${users[userIndex].currency} left`);
       }
 
       await db.setUsersMoney(userRecord.id, userRecord.amount - betAmount)

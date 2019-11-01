@@ -9,9 +9,20 @@ express().listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 const PREFIX = '$';
 
-const bot = new eris.Client(process.env.TEST_BOT_TOKEN);
+const bot = new eris.Client(process.env.BOT_TOKEN);
 
-bot.on("ready", () => {
+let channels;
+
+bot.on("ready", async () => {
+  const cs = await db.getChannels();
+
+  channels = cs.map((channel) => {
+    return {
+      channel_discord_id: channel.channel_discord_id,
+      server_id: channel.server_id,
+      watch: channel.watch
+    };
+  });
   console.log("Ready!");
 });
 
@@ -33,16 +44,16 @@ commandForName['bet'] = {
       return await msg.channel.createMessage('$bet [amount] [captain]');
     }
 
-    const bettingOpen = await db.isBettingOpen();
+    const bettingOpen = await db.isBettingOpen(getServerId(msg.channel.id));
 
-    if (!bettingState || !bettingOpen) {
+    if (!bettingOpen) {
       return await msg.channel.createMessage('Betting is not open');
     }
 
     const authorId = msg.author.id;
     let captainName = args.slice(1).join(' ');
 
-    const captains = await db.getCaptains(captainName);
+    const captains = await db.getCaptains(captainName, getServerId(msg.channel.id));
 
     if (!captainName || !captains || captains.length === 0) {
       return await msg.channel.createMessage(`${captainName} is not a captain`);
@@ -51,7 +62,7 @@ commandForName['bet'] = {
     // correct capitalization
     captainName = captains[0].username;
 
-    const userRecord = await db.getUser(authorId, null);
+    const userRecord = await db.getUser(authorId, null, getServerId(msg.channel.id));
 
     if (userRecord) {
       if (userRecord.amount <= 0) {
@@ -74,7 +85,7 @@ commandForName['bet'] = {
         return msg.channel.createMessage('You only start with 5');
       }
 
-      const newUserRecord = await db.createUser(msg.author.username, authorId);
+      const newUserRecord = await db.createUser(msg.author.username, authorId, getServerId(msg.channel.id));
       const currency = getCurrencyType();
 
       await db.createMoney(newUserRecord.id, currency, 5 - betAmount);
@@ -181,7 +192,7 @@ commandForName['currency'] = {
       newCurrencyName = args.slice(0).join(' ');
     }
 
-    let userRecord = await db.getUser(msg.mentions[0].id, null);
+    let userRecord = await db.getUser(msg.mentions[0].id, null, getServerId(msg.channel.id));
 
     if (userRecord) {
       // update the currency name
@@ -190,7 +201,7 @@ commandForName['currency'] = {
       return msg.channel.createMessage(`${userRecord.username} has ${userRecord.amount} ${newCurrencyName}`);
     } else {
       //new user
-      userRecord = await db.createUser(msg.mentions[0].username, msg.mentions[0].id);
+      userRecord = await db.createUser(msg.mentions[0].username, msg.mentions[0].id, getServerId(msg.channel.id));
       await db.createMoney(userRecord.id, newCurrencyName, 5);
 
       return msg.channel.createMessage(`${userRecord.username} has 5 ${newCurrencyName}`);
@@ -207,9 +218,9 @@ commandForName['bets'] = {
     let usersBets;
 
     if (!args.length) {
-      usersBets = await db.getAllBets(msg.author.id);
+      usersBets = await db.getAllBets(msg.author.id, getServerId(msg.channel.id));
     } else {
-      usersBets = await db.getAllBets();
+      usersBets = await db.getAllBets(null, getServerId(msg.channel.id));
     }
 
     for (const bet of usersBets) {
@@ -255,17 +266,17 @@ commandForName['money'] = {
     let userRecord;
 
     if (msg.mentions.length === 1) {
-      userRecord = await db.getUser(msg.mentions[0].id, null);
+      userRecord = await db.getUser(msg.mentions[0].id, null, getServerId(msg.channel.id));
     } else if (args.length > 0) {
-      userRecord = await db.getUser(null, otherUsername);
+      userRecord = await db.getUser(null, otherUsername, getServerId(msg.channel.id));
     } else {
       // own money
-      userRecord = await db.getUser(msg.author.id, null);
+      userRecord = await db.getUser(msg.author.id, null, getServerId(msg.channel.id));
 
       if (!userRecord) {
         // create a new user
 
-        const newUserRecord = await db.createUser(msg.author.username, authorId);
+        const newUserRecord = await db.createUser(msg.author.username, msg.author.id, getServerId(msg.channel.id));
         const currency = getCurrencyType();
         await db.createMoney(newUserRecord.id, currency, 5);
 
@@ -286,14 +297,18 @@ commandForName['leaderboard'] = {
   admin: false,
   execute: async (msg, args) => {
 
-    const allUsers = await db.getAllUsers();
+    const allUsers = await db.getAllUsersWithBets(getServerId(msg.channel.id));
 
     if (!allUsers || allUsers.length === 0) {
       return msg.channel.createMessage(`Something went real wrong 1. <@130569142863396865>`);
     }
 
+    for (const user of allUsers) {
+      user.total = Number(user.banked) + (user.bets ? Number(user.bets) : 0);
+    }
+
     allUsers.sort((userA, userB) => {
-      return userB.amount - userA.amount;
+      return userB.total - userA.total;
     });
 
     const fields = [];
@@ -301,7 +316,7 @@ commandForName['leaderboard'] = {
     for (let i = 0; i < allUsers.length && i < 5; i++) {
       fields.push({
         name: allUsers[i].username,
-        value: `${allUsers[i].amount} ${allUsers[i].currency}`
+        value: `${allUsers[i].total} ${allUsers[i].currency}`
       });
     }
 
@@ -322,23 +337,30 @@ commandForName['loserboard'] = {
   admin: false,
   execute: async (msg, args) => {
 
-    const allUsers = await db.getAllUsers();
+    const allUsers = await db.getAllUsersWithBets(getServerId(msg.channel.id));
 
     if (!allUsers || allUsers.length === 0) {
-      return msg.channel.createMessage(`Something went real wrong 2. <@130569142863396865>`);
+      return msg.channel.createMessage(`Something went real wrong 1. <@130569142863396865>`);
+    }
+
+    for (const user of allUsers) {
+      user.total = Number(user.banked) + (user.bets ? Number(user.bets) : 0);
+      console.log(user)
     }
 
     allUsers.sort((userA, userB) => {
-      return userA.amount - userB.amount;
+      return userA.total - userB.total;
     });
 
     const fields = [];
 
-    for (let i = 0; i < allUsers.length && i < 5; i++) {
-      fields.push({
-        name: allUsers[i].username,
-        value: `${allUsers[i].amount} ${allUsers[i].currency}`
-      });
+    for (let i = 0; i < allUsers.length; i++) {
+      if (fields.length < 5 && allUsers[i].total < 5) {
+        fields.push({
+          name: allUsers[i].username,
+          value: `${allUsers[i].total} ${allUsers[i].currency}`
+        });
+      }
     }
 
     return bot.createMessage(msg.channel.id, {
@@ -353,6 +375,8 @@ commandForName['loserboard'] = {
   },
 };
 
+//todo matchups command?
+
 // $captains [add/remove/get] [@user]
 commandForName['captains'] = {
   admin: false,
@@ -360,7 +384,7 @@ commandForName['captains'] = {
     const admin = await db.getAdmin(msg.author.id);
 
     if (!admin || args.length === 0) {
-      const captains = await db.getCaptains();
+      const captains = await db.getCaptains(null, getServerId(msg.channel.id));
 
       return bot.createMessage(msg.channel.id, {
         embed: {
@@ -374,8 +398,8 @@ commandForName['captains'] = {
       return msg.channel.createMessage('$captains [add/remove] [@user]');
     }
 
-    const captains = await db.getCaptains();
-    const users = await db.getAllUsers();
+    const captains = await db.getCaptains(null, getServerId(msg.channel.id));
+    const users = await db.getAllUsers(getServerId(msg.channel.id));
 
     if (args[0] === 'add') {
       for (const mention of msg.mentions) {
@@ -383,7 +407,7 @@ commandForName['captains'] = {
           let user = users.find((user) => user.discord_id === mention.id);
 
           if (!user) {
-            user = await db.createUser(mention.username, mention.id);
+            user = await db.createUser(mention.username, mention.id, getServerId(msg.channel.id));
           }
           await db.createCaptain(user.id);
         }
@@ -395,7 +419,7 @@ commandForName['captains'] = {
       await db.deleteCaptains(userIdsToDelete)
     }
 
-    const updatedCaptains = await db.getCaptains();
+    const updatedCaptains = await db.getCaptains(null, getServerId(msg.channel.id));
 
     return bot.createMessage(msg.channel.id, {
       embed: {
@@ -412,8 +436,8 @@ commandForName['captains'] = {
 // $open
 commandForName['open'] = {
   admin: true,
-  execute: (msg, args) => {
-    bettingState = 'open';
+  execute: async (msg, args) => {
+    await db.openBetting(getServerId(msg.channel.id));
     return msg.channel.createMessage('Betting is open');
   },
 };
@@ -421,8 +445,8 @@ commandForName['open'] = {
 // $close
 commandForName['close'] = {
   admin: true,
-  execute: (msg, args) => {
-    bettingState = 'closed';
+  execute: async (msg, args) => {
+    await db.closeBetting(getServerId(msg.channel.id));
     return msg.channel.createMessage('Betting is closed');
   },
 };
@@ -431,13 +455,13 @@ commandForName['close'] = {
 commandForName['payout'] = {
   admin: true,
   execute: async (msg, args) => {
-    await db.closeBetting();
+    await db.closeBetting(getServerId(msg.channel.id));
 
     const wonBets = [];
     const tiedBets = [];
     const lostBets = [];
 
-    const results = await db.getBettingResults();
+    const results = await db.getBettingResults(getServerId(msg.channel.id));
 
     for (const result of results) {
       if (result.result === 2) {
@@ -453,7 +477,7 @@ commandForName['payout'] = {
       }
     }
 
-    await db.resetBetting();
+    await db.resetBetting(getServerId(msg.channel.id));
 
     return bot.createMessage(msg.channel.id, {
       embed: {
@@ -463,13 +487,13 @@ commandForName['payout'] = {
         },
         fields: [{
           name: "Won",
-          value: wonBets.join('')
+          value: wonBets.length ? wonBets.join('') : '~'
         }, {
           name: "Tied",
-          value: tiedBets.join('')
+          value: tiedBets.length ? tiedBets.join('') : '~'
         }, {
           name: "Lost",
-          value: lostBets.join('')
+          value: lostBets.length ? lostBets.join('') : '~'
         }]
       }
     });
@@ -492,7 +516,7 @@ commandForName['winners'] = {
     }
 
     const usernames = args.slice(1);
-    const captains = await db.getCaptains();
+    const captains = await db.getCaptains(null, getServerId(msg.channel.id));
 
     if (action === 'add') {
       for (const username of usernames) {
@@ -515,7 +539,7 @@ commandForName['winners'] = {
         }
       });
     } else if (action === 'remove') {
-      const captains = await db.getCaptains(usernames[0]);
+      const captains = await db.getCaptains(usernames[0], getServerId(msg.channel.id));
 
       if (captains && captains.length > 0) {
         await db.deleteWinner(captains[0].id);
@@ -559,7 +583,7 @@ commandForName['ties'] = {
     }
 
     const usernames = args.slice(1);
-    const captains = await db.getCaptains();
+    const captains = await db.getCaptains(null, getServerId(msg.channel.id));
 
     if (action === 'add') {
       for (const username of usernames) {
@@ -582,7 +606,7 @@ commandForName['ties'] = {
         }
       });
     } else if (action === 'remove') {
-      const captains = await db.getCaptains(usernames[0]);
+      const captains = await db.getCaptains(usernames[0], getServerId(msg.channel.id));
 
       if (captains && captains.length > 0) {
         await db.deleteTie(captains[0].id);
@@ -731,7 +755,7 @@ commandForName['admins'] = {
     }
 
     const admins = await db.getAdmin();
-    const users = await db.getAllUsers();
+    const users = await db.getAllUsers(getServerId(msg.channel.id));
 
     if (args[0] === 'add') {
       for (const mention of msg.mentions) {
@@ -739,7 +763,7 @@ commandForName['admins'] = {
           let user = users.find((user) => user.discord_id === mention.id);
 
           if (!user) {
-            user = await db.createUser(mention.username, mention.id);
+            user = await db.createUser(mention.username, mention.id, getServerId(msg.channel.id));
           }
           await db.createAdmin(user.id);
         }
@@ -765,13 +789,38 @@ commandForName['admins'] = {
   },
 };
 
+// $test
+commandForName['test'] = {
+  owner: true,
+  execute: async (msg, args) => {
+    return
+  },
+};
+
 function isOwner (userId) {
   return userId === process.env.OWNER_DISCORD_ID;
 }
 
+function isWatchingChannel (discord_id) {
+  return channels.some((channel) => channel.channel_discord_id === discord_id && channel.watch);
+}
+
+function getServer (channel_discord_id) {
+  return channels.find((channel) => channel.channel_discord_id === channel_discord_id);
+}
+
+function getServerId (channel_discord_id) {
+  const server = getServer(channel_discord_id);
+  if (server && server.server_id) {
+    return server.server_id;
+  }
+  return null;
+}
+
 bot.on('messageCreate', async (msg) => {
   try {
-    if (![process.env.LOG_CHANNEL, ''].includes(msg.channel.id)) {
+
+    if (!isWatchingChannel(msg.channel.id)) {
       return;
     }
 
@@ -818,7 +867,7 @@ bot.on('messageCreate', async (msg) => {
     const args = parts.slice(1);
 
     // ensure stored username is accurate
-    await db.updateUsername(msg.author.id, msg.author.username);
+    // await db.updateUsername(msg.author.id, msg.author.username);
 
     // Execute the command.
     await command.execute(msg, args);

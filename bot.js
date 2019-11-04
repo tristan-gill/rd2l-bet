@@ -81,14 +81,14 @@ commandForName['bet'] = {
 
       return msg.channel.createMessage(`${msg.author.username} bet ${betAmount} ${userRecord.currency} on \`${captainName}\``);
     } else {
-      if (betAmount > 5) {
-        return msg.channel.createMessage('You only start with 5');
+      if (betAmount > 100) {
+        return msg.channel.createMessage('You only start with 100');
       }
 
       const newUserRecord = await db.createUser(msg.author.username, authorId, getServerId(msg.channel.id));
       const currency = getCurrencyType();
 
-      await db.createMoney(newUserRecord.id, currency, 5 - betAmount);
+      await db.createMoney(newUserRecord.id, currency, 100 - betAmount);
 
       await db.createBet(newUserRecord.id, captains[0].id, currency, betAmount);
 
@@ -202,9 +202,9 @@ commandForName['currency'] = {
     } else {
       //new user
       userRecord = await db.createUser(msg.mentions[0].username, msg.mentions[0].id, getServerId(msg.channel.id));
-      await db.createMoney(userRecord.id, newCurrencyName, 5);
+      await db.createMoney(userRecord.id, newCurrencyName, 100);
 
-      return msg.channel.createMessage(`${userRecord.username} has 5 ${newCurrencyName}`);
+      return msg.channel.createMessage(`${userRecord.username} has 100 ${newCurrencyName}`);
     }
   }
 };
@@ -278,9 +278,9 @@ commandForName['money'] = {
 
         const newUserRecord = await db.createUser(msg.author.username, msg.author.id, getServerId(msg.channel.id));
         const currency = getCurrencyType();
-        await db.createMoney(newUserRecord.id, currency, 5);
+        await db.createMoney(newUserRecord.id, currency, 100);
 
-        return msg.channel.createMessage(`${msg.author.username} has 5 ${currency}`);
+        return msg.channel.createMessage(`${msg.author.username} has 100 ${currency}`);
       }
     }
 
@@ -653,7 +653,7 @@ commandForName['info'] = {
         },
         fields: [{
           name: "$bet",
-          value: "Place a bet on a captain. Each player starts with each of the 5 money.\n `$bet [amount] [captain name]`"
+          value: "Place a bet on a captain. Each player starts with 100 money.\n `$bet [amount] [captain name]`"
         }, {
           name: "$money",
           value: "Check to see how much money you have. You can optionally include a players discord name if you want to see their money. If you want to ping them, or they have a messed up name you can mention them.\n `$money`\n`$money TinT`\n`$money @TinT`"
@@ -721,7 +721,7 @@ commandForName['help'] = {
         },
         fields: [{
           name: "$bet",
-          value: "Place a bet on a captain. Each player starts with each of the 5 money. Winning a bet doubles your wager. Ties return your bet amount.\n `$bet [amount] [captain name]`"
+          value: "Place a bet on a captain. Each player starts with 5 money. Winning a bet doubles your wager. Ties return your bet amount.\n `$bet [amount] [captain name]`"
         }, {
           name: "$money",
           value: "Check to see how much money you have. You can optionally include a players discord name if you want to see their money. If you want to ping them, or they have a messed up name you can mention them.\n `$money`\n `$money TinT`\n `$money @TinT`"

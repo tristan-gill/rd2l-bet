@@ -795,128 +795,128 @@ commandForName['test'] = {
   execute: async (msg, args) => {
     const stats = [
       { description:
-         '**Kills/minute: 0.71**\n[KDA: 25 - 1 - 9\n                    Result: Won](https://www.dotabuff.com/matches/5098688696)\n`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
+         '**Kills/minute: 0.73**\n[KDA: 22 - 1 - 12\n                    Result: Won](https://www.dotabuff.com/matches/5100001205)\n `~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
         color: 14681087,
-        author: { name: 'Polo5885' },
+        author: { name: 'Domokun' },
         thumbnail:
          { url:
-            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/b6/b69d74b1fe553c73d748e95c2a34838fb23c5568_full.jpg' },
-        url: 'https://steamcommunity.com/id/polo5885/',
+            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/61/616e5bd1a37b654ed81eac5831c50eea92c65766_full.jpg' },
+        url: 'https://steamcommunity.com/id/debbiepittman/',
         footer:
          { icon_url:
-            'http://cdn.dota2.com/apps/dota2/images/heroes/ember_spirit_full.png',
-           text: 'Ember Spirit' } } ,
+            'http://cdn.dota2.com/apps/dota2/images/heroes/bloodseeker_full.png',
+           text: 'Bloodseeker' } },
       { description:
-         '**Last hits/min: 13.4**\n[KDA: 5 - 3 - 2\n                    Result: Lost](https://www.dotabuff.com/matches/5098725824)\n`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
+         '**Last hits/min: 14.6**\n[KDA: 3 - 5 - 5\n                    Result: Lost](https://www.dotabuff.com/matches/5100036710)\n `~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
         color: 14681087,
-        author: { name: 'UltraGunner' },
+        author: { name: 'Meepwned' },
         thumbnail:
          { url:
-            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/9a/9a23482236c512df56fd7e7abbc2f1d4093aa626_full.jpg' },
-        url: 'https://steamcommunity.com/profiles/76561198066936675/',
+            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/5c/5c068e054ab41b6095f355abd3495916e5dbbe6f_full.jpg' },
+        url: 'https://steamcommunity.com/id/_mappy_/',
         footer:
          { icon_url:
-            'http://cdn.dota2.com/apps/dota2/images/heroes/terrorblade_full.png',
-           text: 'Terrorblade' } } ,
+            'http://cdn.dota2.com/apps/dota2/images/heroes/lycan_full.png',
+           text: 'Lycan' } },
       { description:
-         '**Damage/min: 2087.0**\n[KDA: 20 - 8 - 9\n                    Result: Lost](https://www.dotabuff.com/matches/5098688489)\n`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
+         '**Damage/min: 1701.5**\n[KDA: 12 - 7 - 14\n                    Result: Lost](https://www.dotabuff.com/matches/5100004782)\n `~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
         color: 14681087,
-        author: { name: 'arthreezy' },
+        author: { name: 'Rain艾' },
         thumbnail:
          { url:
-            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/03/037ea75094b2b83dac8f0d38c83d8fcb303c0a28_full.jpg' },
-        url: 'https://steamcommunity.com/id/MrFlyingNightmare/',
+            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/d1/d109585db7f02f1ab2fac0a88877155d469bccd2_full.jpg' },
+        url: 'https://steamcommunity.com/id/Hyuukagen/',
         footer:
          { icon_url:
-            'http://cdn.dota2.com/apps/dota2/images/heroes/clinkz_full.png',
-           text: 'Clinkz' } } ,
+            'http://cdn.dota2.com/apps/dota2/images/heroes/zuus_full.png',
+           text: 'Zeus' } },
       { description:
-         '**Healing/min: 522.9**\n[KDA: 9 - 1 - 14\n                    Result: Won](https://www.dotabuff.com/matches/5098739201)\n`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
+         '**Healing/min: 390.6**\n[KDA: 7 - 9 - 15\n                    Result: Won](https://www.dotabuff.com/matches/5100002163)\n `~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
         color: 14681087,
-        author: { name: 'Joric' },
+        author: { name: 'Montana' },
         thumbnail:
          { url:
-            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/8f/8f50d0c213e057d47b58f2b7cb8402a679113e79_full.jpg' },
-        url: 'https://steamcommunity.com/id/theonlyjoric/',
+            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/66/66d2756089c4f6fe8ab96ec6102539701d28590b_full.jpg' },
+        url: 'https://steamcommunity.com/profiles/76561198176242042/',
         footer:
          { icon_url:
             'http://cdn.dota2.com/apps/dota2/images/heroes/necrolyte_full.png',
-           text: 'Necrophos' } } ,
+           text: 'Necrophos' } },
       { description:
-         '**Time dead: 00:10:27**\n[KDA: 9 - 11 - 9\n                    Result: Lost](https://www.dotabuff.com/matches/5098695306)\n`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
+         '**Time dead: 00:10:46**\n[KDA: 2 - 21 - 13\n                    Result: Lost](https://www.dotabuff.com/matches/5100010175)\n `~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
         color: 14681087,
-        author: { name: 'StarEnd 4.0 (Reformed)' },
+        author: { name: 'verryoldman' },
         thumbnail:
          { url:
-            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/37/3778dd163b644b82e308ef6d7179a9073f5b9471_full.jpg' },
-        url: 'https://steamcommunity.com/profiles/76561198276618999/',
+            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/d7/d7ae3594e7d9336f9e53f0527b388ca28581c03b_full.jpg' },
+        url: 'https://steamcommunity.com/profiles/76561198438057059/',
         footer:
          { icon_url:
-            'http://cdn.dota2.com/apps/dota2/images/heroes/obsidian_destroyer_full.png',
-           text: 'Outworld Devourer' } } ,
+            'http://cdn.dota2.com/apps/dota2/images/heroes/crystal_maiden_full.png',
+           text: 'Crystal Maiden' } },
       { description:
-         '**Tower damage: 17136**\n[KDA: 19 - 6 - 15\n                    Result: Won](https://www.dotabuff.com/matches/5098691618)\n`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
+         '**Tower damage: 19449**\n[KDA: 5 - 2 - 13\n                    Result: Won](https://www.dotabuff.com/matches/5100007100)\n `~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
         color: 14681087,
-        author: { name: '[RD ]Legion' },
+        author: { name: 'Pizza Time ℕ' },
         thumbnail:
          { url:
-            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/18/1845327d50922f15c3dde58fe4f549aa1fd80149_full.jpg' },
-        url: 'https://steamcommunity.com/profiles/76561198084114455/',
+            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/f8/f8d04fff24811c06310f7c7a2dda36ea727500e9_full.jpg' },
+        url: 'https://steamcommunity.com/profiles/76561197962553207/',
         footer:
          { icon_url:
-            'http://cdn.dota2.com/apps/dota2/images/heroes/monkey_king_full.png',
-           text: 'Monkey King' } } ,
+            'http://cdn.dota2.com/apps/dota2/images/heroes/lycan_full.png',
+           text: 'Lycan' } },
       { description:
-         '**GPM: 819**\n[KDA: 14 - 2 - 8\n                    Result: Won](https://www.dotabuff.com/matches/5098724853)\n`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
+         '**GPM: 893**\n[KDA: 21 - 4 - 15\n                    Result: Won](https://www.dotabuff.com/matches/5100040334)\n `~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
         color: 14681087,
-        author: { name: 'modern apocrypha.' },
+        author: { name: 'agent dog' },
         thumbnail:
          { url:
-            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/f3/f320de27013bf520224ee03efd3e738b1dd2d152_full.jpg' },
-        url: 'https://steamcommunity.com/profiles/76561198293492090/',
-        footer:
-         { icon_url:
-            'http://cdn.dota2.com/apps/dota2/images/heroes/naga_siren_full.png',
-           text: 'Naga Siren' } } ,
-      { description:
-         '**XPM: 914**\n[KDA: 25 - 1 - 9\n                    Result: Won](https://www.dotabuff.com/matches/5098688696)\n`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
-        color: 14681087,
-        author: { name: 'Polo5885' },
-        thumbnail:
-         { url:
-            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/b6/b69d74b1fe553c73d748e95c2a34838fb23c5568_full.jpg' },
-        url: 'https://steamcommunity.com/id/polo5885/',
-        footer:
-         { icon_url:
-            'http://cdn.dota2.com/apps/dota2/images/heroes/ember_spirit_full.png',
-           text: 'Ember Spirit' } } ,
-      { description:
-         '**Stacks: 9**\n[KDA: 14 - 7 - 29\n                    Result: Won](https://www.dotabuff.com/matches/5098688489)\n`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
-        color: 14681087,
-        author: { name: 'CRAP' },
-        thumbnail:
-         { url:
-            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/43/431e5669d7ff766ae57aeb932b9ed36e4bfb079b_full.jpg' },
-        url: 'https://steamcommunity.com/id/CRAPDOTA/',
-        footer:
-         { icon_url:
-            'http://cdn.dota2.com/apps/dota2/images/heroes/bristleback_full.png',
-           text: 'Bristleback' } } ,
-      { description:
-         '**Observer kills: 9**\n[KDA: 3 - 13 - 25\n                    Result: Won](https://www.dotabuff.com/matches/5098686413)\n`~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
-        color: 14681087,
-        author: { name: 'Vuvuzela Virtuoso Hans Rudolph' },
-        thumbnail:
-         { url:
-            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/7c/7ca32f3248f6056758faf24c5df61af9bc58b7f1_full.jpg' },
-        url: 'https://steamcommunity.com/id/Joemurp/',
+            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/6c/6c3d0d9b2396af4918802bd60d52b51f65b42aff_full.jpg' },
+        url: 'https://steamcommunity.com/id/dogical/',
         footer:
          { icon_url: 'http://cdn.dota2.com/apps/dota2/images/heroes/axe_full.png',
-           text: 'Axe' } }
+           text: 'Axe' } },
+      { description:
+         '**XPM: 872**\n[KDA: 9 - 0 - 16\n                    Result: Won](https://www.dotabuff.com/matches/5100048197)\n `~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
+        color: 14681087,
+        author: { name: 'InVerSe' },
+        thumbnail:
+         { url:
+            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/6f/6f53d0c687b7a05106eca2e936f5e2c536504cf8_full.jpg' },
+        url: 'https://steamcommunity.com/profiles/76561198095919685/',
+        footer:
+         { icon_url:
+            'http://cdn.dota2.com/apps/dota2/images/heroes/kunkka_full.png',
+           text: 'Kunkka' } },
+      { description:
+         '**Stacks: 6**\n[KDA: 1 - 9 - 18\n                    Result: Lost](https://www.dotabuff.com/matches/5100003815)\n `~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
+        color: 14681087,
+        author: { name: 'Taylo' },
+        thumbnail:
+         { url:
+            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/16/16371843a0dfea195b302514e72234438c7d5f57_full.jpg' },
+        url: 'https://steamcommunity.com/profiles/76561198040879393/',
+        footer:
+         { icon_url:
+            'http://cdn.dota2.com/apps/dota2/images/heroes/disruptor_full.png',
+           text: 'Disruptor' } },
+      { description:
+         '**Observer kills: 8**\n[KDA: 2 - 10 - 13\n                    Result: Lost](https://www.dotabuff.com/matches/5100033617)\n `~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~`',
+        color: 14681087,
+        author: { name: 'TheJohan' },
+        thumbnail:
+         { url:
+            'https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/3d/3d846c540993f38ad5f5cbfe60282f186c79d54b_full.jpg' },
+        url: 'https://steamcommunity.com/id/letutennis8/',
+        footer:
+         { icon_url:
+            'http://cdn.dota2.com/apps/dota2/images/heroes/jakiro_full.png',
+           text: 'Jakiro' } }
     ];
 
     for (const embed of stats) {
-      bot.createMessage('349994269064298498', {
+      bot.createMessage('418185504626966539', {
         embed: embed
       });
     }

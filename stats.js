@@ -40,11 +40,11 @@ const getAllMatches = async (leagueId) => {
   fetched += 50;
   // console.log(JSON.stringify(matches))
 
-  while (matches.length >= fetched) {
-    console.log('Fetching next batch');
-    matches.push(...(await getMatches(leagueId, fetched)));
-    fetched += 50;
-  }
+  // while (matches.length >= fetched) {
+  //   console.log('Fetching next batch');
+  //   matches.push(...(await getMatches(leagueId, fetched)));
+  //   fetched += 50;
+  // }
   console.log(`Total league matches: ${matches.length}`)
 
   const newMatches = matches.filter((match) => {

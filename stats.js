@@ -4,7 +4,7 @@ const rateLimit = require('axios-rate-limit');
 
 const Pool = require('pg').Pool;
 const pool = new Pool({
-  connectionString: process.env.HEROKU_POSTGRESQL_ONYX,
+  connectionString: process.env.HEROKU_POSTGRESQL_ONYX_URL,
   ssl: true
 })
 

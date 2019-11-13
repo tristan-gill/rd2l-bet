@@ -1,7 +1,10 @@
+require('dotenv').config();
+
 const eris = require('eris');
 const fs = require("fs");
 const express = require('express');
 const db = require('./query');
+const stats = require('./stats');
 
 const PORT = process.env.PORT || 5000
 
@@ -27,6 +30,18 @@ bot.on("ready", async () => {
 });
 
 const commandForName = {};
+
+// $stats leagueId startTimestamp endTimestamp region
+commandForName['stats'] = {
+  owner: true,
+  execute: async (msg, args) => {
+    // leagueId rd2l s18: 11278
+    await stats.getAllMatches(11278);
+  },
+};
+
+
+
 
 // $bet [amount] [captain]
 commandForName['bet'] = {

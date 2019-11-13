@@ -40,37 +40,90 @@ const getAllMatches = async (leagueId) => {
   fetched += 50;
   // console.log(JSON.stringify(matches))
 
-  // while (matches.length >= fetched) {
-  //   console.log('Fetching next batch');
-  //   matches.push(...(await getMatches(leagueId, fetched)));
-  //   fetched += 50;
-  // }
+  while (matches.length >= fetched) {
+    console.log('Fetching next batch');
+    matches.push(...(await getMatches(leagueId, fetched)));
+    fetched += 50;
+  }
   console.log(`Total league matches: ${matches.length}`)
 
   const newMatches = matches.filter((match) => {
     return !Object.prototype.hasOwnProperty.call(savedMatches, match.id);
   });
 
-  console.log('Fetching opendota matches');
-  let odota_matches = await Promise.all(newMatches.map(m => opendota.get(`/matches/${m.id}`)));
-  odota_matches.forEach(m => {
-    let match = matches.find(stratz => stratz.id == m.match_id);
-    m.players.forEach(player => {
-      player.steamAccount = match.players.find(stratz => stratz.steamId == player.account_id).steamAccount;
+  const client = await pool.connect();
+
+  for (const newMatch of newMatches) {
+    const match = await opendota.get(`/matches/${newMatch.id}`);
+
+    let stratzMatch = matches.find(stratz => stratz.id == match.match_id);
+    match.players.forEach(player => {
+      player.steamAccount = stratzMatch.players.find(stratz => stratz.steamId == player.account_id).steamAccount;
     });
-    m.regionId = match.regionId;
-    m.startDateTime = match.startDateTime;
-    m.endDateTime = match.endDateTime;
-    m.durationSeconds = match.durationSeconds;
-    m.direTeam = match.direTeam;
-    m.radiantTeam = match.radiantTeam;
-  });
+    match.regionId = stratzMatch.regionId;
+    match.startDateTime = stratzMatch.startDateTime;
+    match.endDateTime = stratzMatch.endDateTime;
+    match.durationSeconds = stratzMatch.durationSeconds;
+    match.direTeam = stratzMatch.direTeam;
+    match.radiantTeam = stratzMatch.radiantTeam;
 
-  await saveMatches(odota_matches);
-
-  console.log('done')
+    await processMatch(match, client);
+    console.log('done: ', match.match_id);
+  }
 }
 
+const processMatch = async (match, client) => {
+  const m = {
+    id: match.match_id,
+    dire_score: match.dire_score,
+    dire_team_id: match.dire_team_id,
+    duration: match.duration,
+    radiant_gold_adv: match.radiant_gold_adv,
+    radiant_score: match.radiant_score,
+    radiant_win: match.radiant_win,
+    radiant_team_id: match.radiant_team_id,
+    radiant_xp_adv: match.radiant_xp_adv,
+    region: match.region,
+    start_time: match.startDateTime,
+    radiant_team_name: match.radiantTeam.name,
+    dire_team_name: match.direTeam.name
+  };
+  await saveMatch(m, client);
+
+  // save players
+  for (const player of match.players) {
+    const p = {
+      id: player.steamAccount.id,
+      profile_uri: player.steamAccount.profileUri,
+      name: player.steamAccount.name,
+      avatar: player.steamAccount.avatar
+    };
+
+    const mp = {
+      matches_id: match.match_id,
+      assists: player.assists,
+      camps_stacked: player.camps_stacked,
+      deaths: player.deaths,
+      denies: player.denies,
+      kills: player.kills,
+      last_hits: player.last_hits,
+      obs_placed: player.obs_placed,
+      sen_placed: player.sen_placed,
+      tower_damage: player.tower_damage,
+      xp_per_min: player.xp_per_min,
+      observer_kills: player.observer_kills,
+      life_state_dead: player.life_state_dead,
+      gold_per_min: player.benchmarks.gold_per_min.raw,
+      hero_damage: player.hero_damage,
+      hero_healing_per_min: player.benchmarks.hero_healing_per_min.raw,
+      heroes_id: player.hero_id,
+      players_id: player.steamAccount.id
+    };
+
+    await savePlayer(p, client);
+    await saveMatchPlayer(mp, client);
+  }
+}
 
 const getAllMatchIds = async (leagueId) => {
   const matchIds = {};

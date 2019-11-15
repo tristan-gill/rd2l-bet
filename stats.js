@@ -227,8 +227,8 @@ const savePlayer = async (player, client) => {
 
 const saveMatchPlayer = async (matchPlayer, client) => {
   const text = `
-    insert into matches_players(matches_id, assists, camps_stacked, deaths, denies, kills, last_hits, obs_placed, sen_placed, tower_damage, xp_per_min, observer_kills, life_state_dead, gold_per_min, hero_damage, hero_healing_per_min, heroes_id, players_id)
-    values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+    insert into matches_players(matches_id, assists, camps_stacked, deaths, denies, kills, last_hits, obs_placed, sen_placed, tower_damage, xp_per_min, observer_kills, life_state_dead, gold_per_min, hero_damage, hero_healing_per_min, heroes_id, players_id, win)
+    values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
     on conflict on constraint matches_players_pkey
     do nothing;
   `;

@@ -53,6 +53,7 @@ const getAllMatches = async (leagueId) => {
   const client = await pool.connect();
 
   for (const newMatch of newMatches) {
+    try {
     const match = await opendota.get(`/matches/${newMatch.id}`);
 
     let stratzMatch = matches.find(stratz => stratz.id == match.match_id);
@@ -68,6 +69,10 @@ const getAllMatches = async (leagueId) => {
 
     await processMatch(match, client);
     console.log('done: ', match.match_id);
+    } catch(e) {
+      console.log('error:', newMatch.id)
+    }
+
   }
 }
 
@@ -546,7 +551,12 @@ const timeToString = (time) => {
   return sign + date.toISOString().substr(11, 8);
 }
 
+const test = async () => {
+  return await opendota.get(`/matches/5109562295`);
+}
+
 module.exports = {
   getAllMatches,
-  getStats
+  getStats,
+  test
 }

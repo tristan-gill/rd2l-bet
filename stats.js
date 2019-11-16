@@ -122,7 +122,7 @@ const processMatch = async (match, client) => {
       hero_healing_per_min: player.benchmarks.hero_healing_per_min.raw,
       heroes_id: player.hero_id,
       players_id: player.steamAccount.id,
-      win: match.win
+      win: player.win
     };
 
     await savePlayer(p, client);
@@ -364,8 +364,7 @@ const getStatsFromMatches = async (matches) => {
       kpm.player_avatar = match.avatar;
       kpm.player_name = match.players_name;
       kpm.player_steam = match.profile_uri;
-      kpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}
-          Result: ${match.win ? 'Won' : 'Lost'}`;
+      kpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}\nResult: ${match.win ? 'Won' : 'Lost'}`;
       kpm.hero = match.heroes_name;
       kpm.hero_url = match.picture;
     }
@@ -379,8 +378,7 @@ const getStatsFromMatches = async (matches) => {
       lhpm.player_avatar = match.avatar;
       lhpm.player_name = match.players_name;
       lhpm.player_steam = match.profile_uri;
-      lhpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}
-          Result: ${match.win ? 'Won' : 'Lost'}`;
+      lhpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}\nResult: ${match.win ? 'Won' : 'Lost'}`;
       lhpm.hero = match.heroes_name;
       lhpm.hero_url = match.picture;
     }
@@ -394,8 +392,7 @@ const getStatsFromMatches = async (matches) => {
       dpm.player_avatar = match.avatar;
       dpm.player_name = match.players_name;
       dpm.player_steam = match.profile_uri;
-      dpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}
-          Result: ${match.win ? 'Won' : 'Lost'}`;
+      dpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}\nResult: ${match.win ? 'Won' : 'Lost'}`;
       dpm.hero = match.heroes_name;
       dpm.hero_url = match.picture;
     }
@@ -409,8 +406,7 @@ const getStatsFromMatches = async (matches) => {
       hpm.player_avatar = match.avatar;
       hpm.player_name = match.players_name;
       hpm.player_steam = match.profile_uri;
-      hpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}
-          Result: ${match.win ? 'Won' : 'Lost'}`;
+      hpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}\nResult: ${match.win ? 'Won' : 'Lost'}`;
       hpm.hero = match.heroes_name;
       hpm.hero_url = match.picture;
     }
@@ -425,8 +421,7 @@ const getStatsFromMatches = async (matches) => {
       timeDead.player_avatar = match.avatar;
       timeDead.player_name = match.players_name;
       timeDead.player_steam = match.profile_uri;
-      timeDead.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}
-          Result: ${match.win ? 'Won' : 'Lost'}`;
+      timeDead.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}\nResult: ${match.win ? 'Won' : 'Lost'}`;
       timeDead.hero = match.heroes_name;
       timeDead.hero_url = match.picture;
     }
@@ -440,8 +435,7 @@ const getStatsFromMatches = async (matches) => {
       towerDamage.player_avatar = match.avatar;
       towerDamage.player_name = match.players_name;
       towerDamage.player_steam = match.profile_uri;
-      towerDamage.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}
-          Result: ${match.win ? 'Won' : 'Lost'}`;
+      towerDamage.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}\nResult: ${match.win ? 'Won' : 'Lost'}`;
       towerDamage.hero = match.heroes_name;
       towerDamage.hero_url = match.picture;
     }
@@ -455,8 +449,7 @@ const getStatsFromMatches = async (matches) => {
       gpm.player_avatar = match.avatar;
       gpm.player_name = match.players_name;
       gpm.player_steam = match.profile_uri;
-      gpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}
-          Result: ${match.win ? 'Won' : 'Lost'}`;
+      gpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}\nResult: ${match.win ? 'Won' : 'Lost'}`;
       gpm.hero = match.heroes_name;
       gpm.hero_url = match.picture;
     }
@@ -470,8 +463,7 @@ const getStatsFromMatches = async (matches) => {
       xpm.player_avatar = match.avatar;
       xpm.player_name = match.players_name;
       xpm.player_steam = match.profile_uri;
-      xpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}
-          Result: ${match.win ? 'Won' : 'Lost'}`;
+      xpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}\nResult: ${match.win ? 'Won' : 'Lost'}`;
       xpm.hero = match.heroes_name;
       xpm.hero_url = match.picture;
     }
@@ -485,8 +477,7 @@ const getStatsFromMatches = async (matches) => {
       stacks.player_avatar = match.avatar;
       stacks.player_name = match.players_name;
       stacks.player_steam = match.profile_uri;
-      stacks.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}
-          Result: ${match.win ? 'Won' : 'Lost'}`;
+      stacks.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}\nResult: ${match.win ? 'Won' : 'Lost'}`;
       stacks.hero = match.heroes_name;
       stacks.hero_url = match.picture;
     }
@@ -500,8 +491,7 @@ const getStatsFromMatches = async (matches) => {
       obsKills.player_avatar = match.avatar;
       obsKills.player_name = match.players_name;
       obsKills.player_steam = match.profile_uri;
-      obsKills.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}
-          Result: ${match.win ? 'Won' : 'Lost'}`;
+      obsKills.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}\nResult: ${match.win ? 'Won' : 'Lost'}`;
       obsKills.hero = match.heroes_name;
       obsKills.hero_url = match.picture;
     }

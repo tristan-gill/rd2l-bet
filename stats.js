@@ -90,7 +90,8 @@ const processMatch = async (match, client) => {
     region: match.region,
     start_time: match.startDateTime,
     radiant_team_name: match.radiantTeam.name,
-    dire_team_name: match.direTeam.name
+    dire_team_name: match.direTeam.name,
+    league_id: match.leagueid
   };
   await saveMatch(m, client);
 

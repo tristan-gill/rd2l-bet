@@ -24,6 +24,22 @@ const getChannels = async () => {
 }
 
 const getAllUsers = async (server_id) => {
+  if (!server_id) {
+    const query = `
+      select
+        users.id as id,
+        username,
+        amount,
+        currency,
+        discord_id
+      from users
+      inner join money on money.user_id = users.id;
+    `;
+
+    const response = await pool.query(query);
+    return response.rows;
+  }
+
   const query = `
     select
       users.id as id,
@@ -41,6 +57,24 @@ const getAllUsers = async (server_id) => {
 }
 
 const getAllUsersWithBets = async (server_id) => {
+  if (!server_id) {
+    const query = `
+      select
+        users.id as id,
+        username,
+        min(money.amount) as banked,
+        sum(bets.amount) as bets,
+        max(money.currency) as currency
+      from users
+      inner join money on money.user_id = users.id
+      left join bets on bets.user_id = users.id
+      group by users.id, username;
+    `;
+
+    const response = await pool.query(query);
+    return response.rows;
+  }
+
   const query = `
     select
       users.id as id,
@@ -155,6 +189,19 @@ const createBet = async (user_id, captain_id, currency, amount) => {
 }
 
 const getCaptains = async (username = null, server_id) => {
+  if (!server_id) {
+    const query = `
+      select
+        captains.id, user_id, username, discord_id
+      from captains
+      inner join users on captains.user_id = users.id;
+    `;
+
+    const response = await pool.query(query);
+
+    return response.rows;
+  }
+
   const and =  username ? `and lower(username) = lower('${username}')` : '';
 
   const query = `
@@ -171,7 +218,42 @@ const getCaptains = async (username = null, server_id) => {
   return response.rows;
 }
 
+const getCaptain = async (discord_id) => {
+  const query = `
+    select
+      captains.id, user_id, username, discord_id
+    from captains
+    inner join users on captains.user_id = users.id
+    where users.discord_id = '${discord_id}';
+  `;
+
+  const response = await pool.query(query);
+
+  return response.rows;
+}
+
 const getAllBets = async (discord_id = null, server_id) => {
+  if (!server_id) {
+    const where = discord_id ? `where bet_user.discord_id = '${discord_id}'` : '';
+
+    const query = `
+      select
+        bet_user.username as username,
+        bets.amount,
+        bets.currency,
+        captain_user.username as captain
+      from bets
+      inner join users as bet_user on bets.user_id = bet_user.id
+      inner join captains on bets.captain_id = captains.id
+      inner join users as captain_user on captains.user_id = captain_user.id
+      ${where};
+    `;
+
+    const response = await pool.query(query);
+
+    return response.rows;
+  }
+
   const and = discord_id ? `and bet_user.discord_id = '${discord_id}'` : '';
 
   const query = `
@@ -393,6 +475,33 @@ const getBettingResults = async (server_id) => {
   return response.rows;
 }
 
+const getBettingResultsForCaptain = async (user_id) => {
+  const query = `
+    select
+      bets.user_id as user_id,
+      bets.currency,
+      bets.amount,
+      case
+        when winners.id is not null then 2
+        when ties.id is not null then 1
+        else 0
+      end as result,
+      users_captain.username as captain_username,
+      users_user.username as username
+    from bets
+    left join winners on bets.captain_id = winners.captain_id
+    left join ties on bets.captain_id = ties.captain_id
+    inner join captains on bets.captain_id = captains.id
+    inner join users as users_captain on captains.user_id = users_captain.id
+    inner join users as users_user on bets.user_id = users_user.id
+    where captains.user_id = ${user_id};
+  `;
+
+  const response = await pool.query(query);
+
+  return response.rows;
+}
+
 const resetBetting = async (server_id) => {
   const resetTies = `
     delete from ties
@@ -429,6 +538,40 @@ const resetBetting = async (server_id) => {
   return;
 }
 
+const getChampions = async () => {
+  const query = `
+    select
+      description,
+      amount,
+      currency,
+      username,
+      name as server_name
+    from historical_champions
+    inner join users on users.id = historical_champions.users_id
+    inner join servers on users.server_id = servers.id;
+  `;
+
+  const response = await pool.query(query);
+
+  return response.rows;
+}
+
+const resetBettingFor = async (winner_captain_id, loser_captain_id) => {
+  const resetWinners = `
+    delete from winners
+    where captain_id = ${winner_captain_id};
+  `;
+
+  const resetBets = `
+    delete from bets
+    where (captain_id = ${winner_captain_id} or captain_id = ${loser_captain_id});
+  `;
+
+  await pool.query(resetWinners);
+  await pool.query(resetBets);
+  return;
+}
+
 module.exports = {
   getChannels,
   getAllUsers,
@@ -458,5 +601,9 @@ module.exports = {
   updateUsersMoney,
   getBettingResults,
   resetBetting,
-  getAllUsersWithBets
+  getAllUsersWithBets,
+  getCaptain,
+  getChampions,
+  getBettingResultsForCaptain,
+  resetBettingFor
 }

@@ -220,11 +220,14 @@ const createBet = async (user_id, captain_id, currency, amount) => {
 
 const getCaptains = async (username = null, server_id) => {
   if (!server_id) {
+    const where =  username ? `where lower(username) = lower('${username}')` : '';
+
     const query = `
       select
         captains.id, user_id, username, discord_id
       from captains
-      inner join users on captains.user_id = users.id;
+      inner join users on captains.user_id = users.id
+      ${where};
     `;
 
     const response = await pool.query(query);

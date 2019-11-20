@@ -782,7 +782,7 @@ commandForName['info'] = {
 
     return bot.createMessage(msg.channel.id, {
       embed: {
-        description: "This bot allows you to place bets on `captains` representing their team.\n Winning a bet doubles your money. Here is the list of commands.",
+        description: "This bot allows you to place bets on `captains` representing their team.\n Winning a bet doubles your money. You only get 100 money, if you burn it all on the first round of playoffs, sucks to be you. Here is the list of commands.",
         color: 0x008000,
         author: {
           name: "RD2L Betting"

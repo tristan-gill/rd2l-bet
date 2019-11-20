@@ -309,7 +309,7 @@ commandForName['champions'] = {
 
 function getCurrencyType () {
   const currencies = [
-    'poonbucks', 'toxic dollars', 'chappys', 'truckwaffles', 'egifts', 'shrutebucks', 'dollaridoos', 'tangos',
+    'poonbucks', 'toxic dollars', 'chappys', 'truckwaffles', 'montanas', 'shrutebucks', 'dollaridoos', 'tangos',
     'bonks', 'badmins', 'litres of poonani\'s bathwater', 'funzos', 'missed echo slams', 'meepos'
   ];
 
@@ -587,7 +587,7 @@ function stringFromArgs (arg) {
 commandForName['playoff'] = {
   admin: true,
   execute: async (msg, args) => {
-    if (!args || args.length < 2 || msg.mentions.length < 2) {
+    if (!args || args.length < 2) {
       return msg.channel.createMessage('$playoff [@winner] [@loser]');
     }
 

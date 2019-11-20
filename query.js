@@ -107,6 +107,36 @@ const isBettingOpen = async (server_id) => {
 }
 
 const getUser = async (discord_id = null, username = null, server_id) => {
+  if (!server_id) {
+    let and = '';
+
+    if (discord_id !== null) {
+      and = `and discord_id = '${discord_id}'`;
+    } else if (username !== null) {
+      and = `and lower(username) = lower('${username}')`;
+    }
+
+    const query = `
+      select
+        users.id as id,
+        username,
+        discord_id,
+        money.id as money_id,
+        currency,
+        amount
+      from users
+      inner join money on users.id = money.user_id
+      where 1 = 1
+        ${and};
+    `;
+
+    const response = await pool.query(query);
+
+    if (response.rows && response.rows.length) {
+      return response.rows[0];
+    }
+  }
+
   let and = '';
 
   if (discord_id !== null) {

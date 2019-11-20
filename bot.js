@@ -95,7 +95,8 @@ commandForName['bet'] = {
     // correct capitalization
     captainName = captains[0].username;
 
-    const userRecord = await db.getUser(authorId, null, getServerId(msg.channel.id));
+    // const userRecord = await db.getUser(authorId, null, getServerId(msg.channel.id));
+    const userRecord = await db.getUser(authorId, null, null);
 
     if (userRecord) {
       if (userRecord.amount <= 0) {
@@ -225,7 +226,8 @@ commandForName['currency'] = {
       newCurrencyName = args.slice(0).join(' ');
     }
 
-    let userRecord = await db.getUser(msg.mentions[0].id, null, getServerId(msg.channel.id));
+    // let userRecord = await db.getUser(msg.mentions[0].id, null, getServerId(msg.channel.id));
+    let userRecord = await db.getUser(msg.mentions[0].id, null, null);
 
     if (userRecord) {
       // update the currency name
@@ -329,12 +331,15 @@ commandForName['money'] = {
     let userRecord;
 
     if (msg.mentions.length === 1) {
-      userRecord = await db.getUser(msg.mentions[0].id, null, getServerId(msg.channel.id));
+      // userRecord = await db.getUser(msg.mentions[0].id, null, getServerId(msg.channel.id));
+      userRecord = await db.getUser(msg.mentions[0].id, null, null);
     } else if (args.length > 0) {
-      userRecord = await db.getUser(null, otherUsername, getServerId(msg.channel.id));
+      // userRecord = await db.getUser(null, otherUsername, getServerId(msg.channel.id));
+      userRecord = await db.getUser(null, otherUsername, null);
     } else {
       // own money
-      userRecord = await db.getUser(msg.author.id, null, getServerId(msg.channel.id));
+      // userRecord = await db.getUser(msg.author.id, null, getServerId(msg.channel.id));
+      userRecord = await db.getUser(msg.author.id, null, null);
 
       if (!userRecord) {
         // create a new user

@@ -267,15 +267,29 @@ commandForName['bets'] = {
       });
     }
 
-    return bot.createMessage(msg.channel.id, {
-      embed: {
-        color: 0x008000,
-        author: {
-          name: "Bets"
-        },
-        fields: fields
+    if (fields.length > 20) {
+      for (let i = 0; i < fields.length; i += 20) {
+        bot.createMessage(msg.channel.id, {
+          embed: {
+            color: 0x008000,
+            author: {
+              name: "Bets"
+            },
+            fields: fields.slice(i, i + 20)
+          }
+        });
       }
-    });
+    } else {
+      return bot.createMessage(msg.channel.id, {
+        embed: {
+          color: 0x008000,
+          author: {
+            name: "Bets"
+          },
+          fields: fields
+        }
+      });
+    }
   }
 };
 

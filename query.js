@@ -211,8 +211,8 @@ const createMoney = async (user_id, currency, amount) => {
 
 const createBet = async (user_id, captain_id, currency, amount) => {
   const query = `
-    insert into bets (user_id, captain_id, currency, amount)
-    values (${user_id}, ${captain_id}, '${currency}', ${amount});
+    insert into bets (user_id, captain_id, currency, amount, time)
+    values (${user_id}, ${captain_id}, '${currency}', ${amount}, NOW());
   `;
 
   const response = await pool.query(query);

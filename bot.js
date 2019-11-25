@@ -666,7 +666,8 @@ commandForName['winners'] = {
     }
 
     const usernames = args.slice(1);
-    const captains = await db.getCaptains(null, getServerId(msg.channel.id));
+    // const captains = await db.getCaptains(null, getServerId(msg.channel.id));
+    const captains = await db.getCaptains(null, null);
 
     if (action === 'add') {
       for (const username of usernames) {
@@ -689,7 +690,8 @@ commandForName['winners'] = {
         }
       });
     } else if (action === 'remove') {
-      const captains = await db.getCaptains(usernames[0], getServerId(msg.channel.id));
+      // const captains = await db.getCaptains(usernames[0], getServerId(msg.channel.id));
+      const captains = await db.getCaptains(usernames[0], null);
 
       if (captains && captains.length > 0) {
         await db.deleteWinner(captains[0].id);

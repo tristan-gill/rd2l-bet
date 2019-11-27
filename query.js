@@ -482,6 +482,32 @@ const deleteTie = async (captain_id) => {
 }
 
 const getBettingResults = async (server_id) => {
+  if (!server_id) {
+    const query = `
+      select
+        bets.user_id as user_id,
+        bets.currency,
+        bets.amount,
+        case
+          when winners.id is not null then 2
+          when ties.id is not null then 1
+          else 0
+        end as result,
+        users_captain.username as captain_username,
+        users_user.username as username
+      from bets
+      left join winners on bets.captain_id = winners.captain_id
+      left join ties on bets.captain_id = ties.captain_id
+      inner join captains on bets.captain_id = captains.id
+      inner join users as users_captain on captains.user_id = users_captain.id
+      inner join users as users_user on bets.user_id = users_user.id;
+    `;
+
+    const response = await pool.query(query);
+
+    return response.rows;
+  }
+
   const query = `
     select
       bets.user_id as user_id,
@@ -536,6 +562,20 @@ const getBettingResultsForCaptain = async (user_id) => {
 }
 
 const resetBetting = async (server_id) => {
+  if (!server_id) {
+    const resetWinners = `
+      delete from winners;
+    `;
+
+    const resetBets = `
+      delete from bets;
+    `;
+
+    await pool.query(resetWinners);
+    await pool.query(resetBets);
+    return;
+  }
+
   const resetTies = `
     delete from ties
     where exists (

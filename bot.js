@@ -543,13 +543,14 @@ commandForName['close'] = {
 commandForName['payout'] = {
   admin: true,
   execute: async (msg, args) => {
-    await db.closeBetting(getServerId(msg.channel.id));
+    // await db.closeBetting(getServerId(msg.channel.id));
 
     const wonBets = [];
     const tiedBets = [];
     const lostBets = [];
 
-    const results = await db.getBettingResults(getServerId(msg.channel.id));
+    // const results = await db.getBettingResults(getServerId(msg.channel.id));
+    const results = await db.getBettingResults(null);
 
     for (const result of results) {
       if (result.result === 2) {
@@ -565,7 +566,8 @@ commandForName['payout'] = {
       }
     }
 
-    await db.resetBetting(getServerId(msg.channel.id));
+    // await db.resetBetting(getServerId(msg.channel.id));
+    await db.resetBetting(null);
 
     return bot.createMessage(msg.channel.id, {
       embed: {
@@ -576,9 +578,6 @@ commandForName['payout'] = {
         fields: [{
           name: "Won",
           value: wonBets.length ? wonBets.join('') : '~'
-        }, {
-          name: "Tied",
-          value: tiedBets.length ? tiedBets.join('') : '~'
         }, {
           name: "Lost",
           value: lostBets.length ? lostBets.join('') : '~'

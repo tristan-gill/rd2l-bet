@@ -165,7 +165,8 @@ const saveMatches = async (matches) => {
       region: match.region,
       start_time: match.startDateTime,
       radiant_team_name: match.radiantTeam.name,
-      dire_team_name: match.direTeam.name
+      dire_team_name: match.direTeam.name,
+      league_id: match.leagueid
     };
     await saveMatch(m, client);
 
@@ -209,8 +210,8 @@ const saveMatches = async (matches) => {
 
 const saveMatch = async (match, client) => {
   const text = `
-    insert into matches(id, dire_score, dire_team_id, duration, radiant_gold_adv, radiant_score, radiant_win, radiant_team_id, radiant_xp_adv, region, start_time, radiant_team_name, dire_team_name)
-    values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+    insert into matches(id, dire_score, dire_team_id, duration, radiant_gold_adv, radiant_score, radiant_win, radiant_team_id, radiant_xp_adv, region, start_time, radiant_team_name, dire_team_name, league_id)
+    values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
     on conflict on constraint matches_pkey
     do nothing;
   `;

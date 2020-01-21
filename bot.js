@@ -46,7 +46,9 @@ commandForName['stats'] = {
   execute: async (msg, args) => {
     // leagueId rd2l s18: 11278
 
-    // $stats 11278 1573518600 1573543800 2 631605827337191426
+    // 2 is est
+
+    // $stats 11608 1579568400 1579590000 2 631605827337191426
     const s = await stats.getStats(args[0], args[1], args[2], args[3]);
 
     for (const embed of s) {

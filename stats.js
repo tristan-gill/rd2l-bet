@@ -245,6 +245,10 @@ const saveMatchPlayer = async (matchPlayer, client) => {
 }
 
 const getMatches = async (league_id, start_time, end_time, region) => {
+  let regionString = '';
+  if (region !== '-') {
+    regionString = `and region = ${region}`;
+  }
   const query = `
     select
       matches.id as match_id,
@@ -277,7 +281,7 @@ const getMatches = async (league_id, start_time, end_time, region) => {
     inner join heroes on heroes.id = matches_players.heroes_id
     where league_id = ${league_id}
       and start_time between ${start_time} and ${end_time}
-      and region = ${region};
+      ${regionString};
   `;
 
   const response = await pool.query(query);

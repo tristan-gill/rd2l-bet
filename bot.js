@@ -127,7 +127,10 @@ commandForName['predict'] = {
     }
     // send the prediction query
     const message = await msg.author.send(`**Round ${predictionInfo.matchup_round} match ${predictionInfo.matchup_order_num}: ${homeTeam.name} vs ${awayTeam.name}**\n1️⃣ - ${homeTeam.name}\n2️⃣ - ${awayTeam.name}`);
-    await message.react('1️⃣').then(() => message.react('2️⃣')).then(() => message.react('🅰️')).then(() => message.react('🅱️'));
+    await message.react('1️⃣');
+    await message.react('2️⃣');
+    await message.react('🅰️');
+    await message.react('🅱️');
 
     // wait for the react
     // use the react to create the proper prediction row
@@ -135,7 +138,8 @@ commandForName['predict'] = {
       return ['1️⃣', '2️⃣', '🅰️', '🅱️'].includes(reaction.emoji.name) && user.id === msg.author.id;
     };
 
-    message.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then(collected => {
+    await message.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then((collected) => {
+      console.log({collected})
       const reaction = collected.first();
 
       if (reaction.emoji.name === '1️⃣') {

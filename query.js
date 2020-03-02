@@ -128,7 +128,8 @@ const getPredictions = async (user_id) => {
       teams.name as winning_team_name
     from predictions
     inner join teams on teams.id = winning_team_id
-    where predictor_id = ${user_id};
+    where predictor_id = ${user_id}
+    order by matchup_round desc, matchup_order_num desc;
   `;
 
   const response = await pool.query(query);
@@ -170,6 +171,18 @@ const getMatchups = async () => {
   return response.rows;
 }
 
+const addReason = async (prediction_id, reason) => {
+  const text = `
+    update predictions
+    set reason = $1
+    where id = $2;
+  `;
+
+  const response = await pool.query(text, [reason, prediction_id]);
+
+  return response.rows;
+}
+
 module.exports = {
   getChannels,
   getAdmin,
@@ -180,5 +193,6 @@ module.exports = {
   createUser,
   getPredictions,
   createPrediction,
-  getMatchups
+  getMatchups,
+  addReason
 }

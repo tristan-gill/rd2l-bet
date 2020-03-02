@@ -104,7 +104,7 @@ function getNextPrediction (user_id, predictions) {
   };
 }
 
-// $admins [add/remove] [@user]
+// $predict
 commandForName['predict'] = {
   execute: async (msg, args) => {
 
@@ -120,18 +120,19 @@ commandForName['predict'] = {
     const { homeTeam, awayTeam, predictionInfo, completed } = getNextPrediction(user.id, predictions)
 
     if (completed) {
-      return msg.channel.send(`${msg.author.username} has completed predictions`)
+      return msg.channel.send(`${msg.author.username} has completed predictions.`)
       // return msg.author.send('You have completed predictions');
+    } else if (predictionInfo.matchup_round === 1 && predictionInfo.matchup_order_num === 1) {
+      await msg.author.send('I am a bot that allows you to create a prediction bracket for RD2L playoffs. I will prompt you with a matchup and you can guess the outcome. Reacting with a 1️⃣ or 2️⃣ will indicate which team you think will win. If you want to type out a reason for your prediction, which might be used as content, then react with 🅰️ for 🅱️ instead of 1️⃣ or 2️⃣ to be asked for a writeup.')
     }
-
     // send the prediction query
     const message = await msg.author.send(`**Round ${predictionInfo.matchup_round} match ${predictionInfo.matchup_order_num}: ${homeTeam.name} vs ${awayTeam.name}**\n1️⃣ - ${homeTeam.name}\n2️⃣ - ${awayTeam.name}`);
-    await message.react('1️⃣').then(() => message.react('2️⃣'));
+    await message.react('1️⃣').then(() => message.react('2️⃣')).then(() => message.react('🅰️')).then(() => message.react('🅱️'));
 
     // wait for the react
     // use the react to create the proper prediction row
     const filter = (reaction, user) => {
-      return ['1️⃣', '2️⃣'].includes(reaction.emoji.name) && user.id === msg.author.id;
+      return ['1️⃣', '2️⃣', '🅰️', '🅱️'].includes(reaction.emoji.name) && user.id === msg.author.id;
     };
 
     message.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then(collected => {
@@ -151,8 +152,23 @@ commandForName['predict'] = {
 
         // save prediction
         return db.createPrediction(predictionInfo);
+      } else if (reaction.emoji.name === '🅰️') {
+        predictionInfo.winning_team_id = homeTeam.id;
+        db.createPrediction(predictionInfo);
+
+        message.reply(`You predicted that ${homeTeam.name} will beat ${awayTeam.name}.\n\`$reason ADD WORDS HERE\`: if you wish to explain why.\n\`$predict\`: if you didn't mean to do this and want to resume predicting`);
+        return false;
+      } else if (reaction.emoji.name === '🅱️') {
+        predictionInfo.winning_team_id = awayTeam.id;
+        db.createPrediction(predictionInfo);
+
+        message.reply(`You predicted that ${awayTeam.name} will beat ${homeTeam.name}.\n\`$reason ADD WORDS HERE\`: if you wish to explain why.\n\`$predict\`: if you didn't mean to do this and want to resume predicting`);
+        return false;
       }
-    }).then(() => {
+    }).then((dontGoNext) => {
+      if (dontGoNext === false) {
+        return;
+      }
       return commandForName['predict'].execute(msg, args);
     }).catch((collected) => {
       // they did not react in time
@@ -160,14 +176,58 @@ commandForName['predict'] = {
   },
 };
 
-// $teams [add/remove] [teamname]
+// $reason ADD WORDS HERE
+commandForName['reason'] = {
+  execute: async (msg, args) => {
+
+    let user = await db.getUser(msg.author.id);
+    if (!user || !user.id) {
+      // they shouldnt be able to add a reason without having a user account
+      return msg.reply('Something went wrong, you shouldn\'t be able to add a reason because you don\'t exist.');
+    }
+
+    // find the predictions this person has made, the most recent one should be first
+    const predictions = await db.getPredictions(user.id);
+
+    if (!predictions || predictions.length < 1) {
+      return msg.reply('Something went wrong, you have no predictions to make a reason for.');
+    }
+
+    const prediction = predictions[0];
+
+    if (!args || args.length < 1) {
+      return msg.reply('Something went wrong, you can\'t provide an empty reason.');
+    }
+
+    const reason = args.join(' ');
+
+    await db.addReason(prediction.id, reason);
+
+    await msg.reply(`You added the following reason for ${prediction.winning_team_name} winning their round ${prediction.matchup_round} game:\n\`${reason}\``);
+
+    return commandForName['predict'].execute(msg, args);
+  }
+};
+
+// $teams [add] [teamname]
 commandForName['teams'] = {
   admin: true,
   execute: async (msg, args) => {
     const action = args[0];
 
+    if (!action) {
+      const allTeams = await db.getTeams();
+
+      const embed = new Discord.RichEmbed();
+      embed.setColor('GOLD');
+      embed.setDescription(allTeams.map((team) => team.name).join(', '));
+      embed.setAuthor('Current teams');
+
+      return msg.channel.send(embed);
+    }
+
     if (!args || args.length < 1 || !['add', 'remove'].includes(action)) {
-      return msg.channel.send('$teams [add/remove] [teamname teamname]');
+      return msg.channel.send('$teams [add] [teamname teamname]');
     }
 
     const teamNames = args.slice(1);
@@ -201,7 +261,7 @@ commandForName['matchups'] = {
     const action = args[0];
 
     if (!args || args.length < 1 || !['add', 'remove'].includes(action)) {
-      return msg.channel.send('$winners [add/remove/get] [@usernames]');
+      return msg.channel.send('$matchups [add] [homename-awayname-round-order]');
     }
 
     const matchups = args.slice(1);

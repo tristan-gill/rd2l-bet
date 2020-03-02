@@ -138,45 +138,78 @@ commandForName['predict'] = {
       return ['1️⃣', '2️⃣', '🅰️', '🅱️'].includes(reaction.emoji.name) && user.id === msg.author.id;
     };
 
-    await message.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then((collected) => {
-      console.log({collected})
-      const reaction = collected.first();
-
+    const collector = message.createReactionCollector(filter, { max: 1, time: 60000 });
+    collector.on('collect', async (reaction, reactionCollector) => {
       if (reaction.emoji.name === '1️⃣') {
-        message.reply(`You predicted that ${homeTeam.name} will beat ${awayTeam.name}.`);
-
-        predictionInfo.winning_team_id = homeTeam.id;
+        await message.reply(`You predicted that ${homeTeam.name} will beat ${awayTeam.name}.`);
 
         // save prediction
-        return db.createPrediction(predictionInfo);
+        predictionInfo.winning_team_id = homeTeam.id;
+        await db.createPrediction(predictionInfo);
+
+        return commandForName['predict'].execute(msg, args);
       } else if (reaction.emoji.name === '2️⃣') {
-        message.reply(`You predicted that ${awayTeam.name} will beat ${homeTeam.name}.`);
-
-        predictionInfo.winning_team_id = awayTeam.id;
+        await message.reply(`You predicted that ${awayTeam.name} will beat ${homeTeam.name}.`);
 
         // save prediction
-        return db.createPrediction(predictionInfo);
-      } else if (reaction.emoji.name === '🅰️') {
-        predictionInfo.winning_team_id = homeTeam.id;
-        db.createPrediction(predictionInfo);
-
-        message.reply(`You predicted that ${homeTeam.name} will beat ${awayTeam.name}.\n\`$reason ADD WORDS HERE\`: if you wish to explain why.\n\`$predict\`: if you didn't mean to do this and want to resume predicting`);
-        return false;
-      } else if (reaction.emoji.name === '🅱️') {
         predictionInfo.winning_team_id = awayTeam.id;
-        db.createPrediction(predictionInfo);
+        await db.createPrediction(predictionInfo);
 
-        message.reply(`You predicted that ${awayTeam.name} will beat ${homeTeam.name}.\n\`$reason ADD WORDS HERE\`: if you wish to explain why.\n\`$predict\`: if you didn't mean to do this and want to resume predicting`);
-        return false;
+        return commandForName['predict'].execute(msg, args);
+      } else if (reaction.emoji.name === '🅰️') {
+        // save prediction
+        predictionInfo.winning_team_id = homeTeam.id;
+        await db.createPrediction(predictionInfo);
+
+        return message.reply(`You predicted that ${homeTeam.name} will beat ${awayTeam.name}.\n\`$reason ADD WORDS HERE\`: if you wish to explain why.\n\`$predict\`: if you didn't mean to do this and want to resume predicting`);
+      } else if (reaction.emoji.name === '🅱️') {
+        // save prediction
+        predictionInfo.winning_team_id = awayTeam.id;
+        await db.createPrediction(predictionInfo);
+
+        return message.reply(`You predicted that ${awayTeam.name} will beat ${homeTeam.name}.\n\`$reason ADD WORDS HERE\`: if you wish to explain why.\n\`$predict\`: if you didn't mean to do this and want to resume predicting`);
       }
-    }).then((dontGoNext) => {
-      if (dontGoNext === false) {
-        return;
-      }
-      return commandForName['predict'].execute(msg, args);
-    }).catch((collected) => {
-      // they did not react in time
     });
+
+    // await message.awaitReactions(filter, { max: 1, time: 60000, errors: ['time'] }).then((collected) => {
+    //   console.log({collected})
+    //   const reaction = collected.first();
+
+    //   if (reaction.emoji.name === '1️⃣') {
+    //     message.reply(`You predicted that ${homeTeam.name} will beat ${awayTeam.name}.`);
+
+    //     predictionInfo.winning_team_id = homeTeam.id;
+
+    //     // save prediction
+    //     return db.createPrediction(predictionInfo);
+    //   } else if (reaction.emoji.name === '2️⃣') {
+    //     message.reply(`You predicted that ${awayTeam.name} will beat ${homeTeam.name}.`);
+
+    //     predictionInfo.winning_team_id = awayTeam.id;
+
+    //     // save prediction
+    //     return db.createPrediction(predictionInfo);
+    //   } else if (reaction.emoji.name === '🅰️') {
+    //     predictionInfo.winning_team_id = homeTeam.id;
+    //     db.createPrediction(predictionInfo);
+
+    //     message.reply(`You predicted that ${homeTeam.name} will beat ${awayTeam.name}.\n\`$reason ADD WORDS HERE\`: if you wish to explain why.\n\`$predict\`: if you didn't mean to do this and want to resume predicting`);
+    //     return false;
+    //   } else if (reaction.emoji.name === '🅱️') {
+    //     predictionInfo.winning_team_id = awayTeam.id;
+    //     db.createPrediction(predictionInfo);
+
+    //     message.reply(`You predicted that ${awayTeam.name} will beat ${homeTeam.name}.\n\`$reason ADD WORDS HERE\`: if you wish to explain why.\n\`$predict\`: if you didn't mean to do this and want to resume predicting`);
+    //     return false;
+    //   }
+    // }).then((dontGoNext) => {
+    //   if (dontGoNext === false) {
+    //     return;
+    //   }
+    //   return commandForName['predict'].execute(msg, args);
+    // }).catch((collected) => {
+    //   // they did not react in time
+    // });
   },
 };
 

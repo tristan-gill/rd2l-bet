@@ -70,7 +70,7 @@ const getAllMatches = async (leagueId) => {
     await processMatch(match, client);
     console.log('done: ', match.match_id);
     } catch(e) {
-      console.log('error:', newMatch.id)
+      console.log('error:', newMatch.id, e)
     }
 
   }
@@ -311,6 +311,13 @@ const getStatsFromMatches = async (matches) => {
       player_id: null
   };
 
+  // least hero damage per min
+  const ldpm = {
+      value: 5000,
+      match_id: null,
+      player_id: null
+  };
+
   // hero healing per min
   const hpm = {
       value: 0,
@@ -401,6 +408,20 @@ const getStatsFromMatches = async (matches) => {
       dpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}\nResult: ${match.win ? 'Won' : 'Lost'}`;
       dpm.hero = match.heroes_name;
       dpm.hero_url = match.picture;
+    }
+
+    if (damage_per_min < ldpm.value) {
+      ldpm.value = damage_per_min;
+      ldpm.match_id = match.match_id;
+      ldpm.player_id = match.players_id;
+
+      ldpm.stat_display = `Lowest damage/min: ${damage_per_min}`;
+      ldpm.player_avatar = match.avatar;
+      ldpm.player_name = match.players_name;
+      ldpm.player_steam = match.profile_uri;
+      ldpm.value_display = `KDA: ${match.kills} - ${match.deaths} - ${match.assists}\nResult: ${match.win ? 'Won' : 'Lost'}`;
+      ldpm.hero = match.heroes_name;
+      ldpm.hero_url = match.picture;
     }
 
     if (match.hero_healing_per_min > hpm.value) {
@@ -507,6 +528,7 @@ const getStatsFromMatches = async (matches) => {
     discordify(kpm),
     discordify(lhpm),
     discordify(dpm),
+    // discordify(ldpm),
     discordify(hpm),
     discordify(timeDead),
     discordify(towerDamage),

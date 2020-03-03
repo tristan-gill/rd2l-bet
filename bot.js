@@ -5,6 +5,7 @@ const client = new Discord.Client();
 const fs = require("fs");
 const db = require('./query');
 const express = require('express');
+const stats = require('./stats');
 
 const PORT = process.env.PORT || 5000
 
@@ -31,6 +32,49 @@ client.once('ready', async () => {
 });
 
 const commandForName = {};
+
+
+// **** Stats ****
+
+// $fetch leagueId
+commandForName['fetch'] = {
+  owner: true,
+  execute: async (msg, args) => {
+    // leagueId rd2l s18: 11278
+    await stats.getAllMatches(args[0]);
+  },
+};
+
+// $stats leagueId startTimestamp endTimestamp region channelId
+commandForName['stats'] = {
+  owner: true,
+  execute: async (msg, args) => {
+    // leagueId rd2l s18: 11278
+
+    // 2 is est
+
+    // $stats 11608 1579568400 1579590000 2 631605827337191426
+    const s = await stats.getStats(args[0], args[1], args[2], args[3]);
+
+    const channel = client.channels.get(args[4]);
+    if (channel) {
+      for (const embedInfo of s) {
+        const embed = new Discord.RichEmbed();
+        embed.setColor('GOLD');
+        embed.setDescription(embedInfo.description);
+        embed.setAuthor(embedInfo.author.name);
+        embed.setThumbnail(embedInfo.thumbnail.url);
+        embed.setURL(embedInfo.url);
+        embed.setFooter(embedInfo.footer.text, embedInfo.footer.icon_url);
+
+        channel.send(embed);
+      }
+    }
+  },
+};
+
+
+// **** Predictions ****
 
 function getNextPrediction (user_id, predictions) {
   // find what prediction the person needs to make next
@@ -147,6 +191,7 @@ commandForName['predict'] = {
         predictionInfo.winning_team_id = homeTeam.id;
         await db.createPrediction(predictionInfo);
 
+        collector.stop();
         return commandForName['predict'].execute(msg, args);
       } else if (reaction.emoji.name === '2️⃣') {
         await message.reply(`You predicted that ${awayTeam.name} will beat ${homeTeam.name}.`);
@@ -155,18 +200,21 @@ commandForName['predict'] = {
         predictionInfo.winning_team_id = awayTeam.id;
         await db.createPrediction(predictionInfo);
 
+        collector.stop();
         return commandForName['predict'].execute(msg, args);
       } else if (reaction.emoji.name === '🅰️') {
         // save prediction
         predictionInfo.winning_team_id = homeTeam.id;
         await db.createPrediction(predictionInfo);
 
+        collector.stop();
         return message.reply(`You predicted that ${homeTeam.name} will beat ${awayTeam.name}.\n\`$reason ADD WORDS HERE\`: if you wish to explain why.\n\`$predict\`: if you didn't mean to do this and want to resume predicting`);
       } else if (reaction.emoji.name === '🅱️') {
         // save prediction
         predictionInfo.winning_team_id = awayTeam.id;
         await db.createPrediction(predictionInfo);
 
+        collector.stop();
         return message.reply(`You predicted that ${awayTeam.name} will beat ${homeTeam.name}.\n\`$reason ADD WORDS HERE\`: if you wish to explain why.\n\`$predict\`: if you didn't mean to do this and want to resume predicting`);
       }
     });
@@ -232,7 +280,7 @@ commandForName['teams'] = {
 
     if (action === 'add') {
       for (const teamName of teamNames) {
-        const team = teams.find((team) => team.name.toLowerCase() === username.toLowerCase());
+        const team = teams.find((team) => team.name.toLowerCase() === teamName.toLowerCase());
 
         if (!team) {
           await db.createTeam(teamName);
@@ -282,6 +330,138 @@ commandForName['matchups'] = {
       return msg.channel.send('That probably worked');
     }
   },
+};
+
+// $results [add/] [winningteamname round order]
+commandForName['results'] = {
+  admin: true,
+  execute: async (msg, args) => {
+    const action = args[0];
+
+    if (!args || args.length < 4 || !['add'].includes(action)) {
+      return msg.channel.send('$results [add] [winningteamname] [round] [order]');
+    }
+
+    const winningTeamName = args[1];
+    const round = args[2];
+    const order = args[3];
+
+    if (!winningTeamName || !round || !order) {
+      return msg.channel.send('$results [add] [winningteamname] [round] [order]');
+    }
+
+    const teams = await db.getTeams();
+
+    const winningTeam = teams.find((team) => team.name.toLowerCase() === winningTeamName.toLowerCase());
+
+    if (!winningTeam) {
+      await msg.channel.send(`I can't find a team name like this: ${winningTeamName}.`);
+      // return teams list
+      return commandForName['teams'].execute(msg, []);
+    }
+
+    const currentResults = await db.getAllResults();
+
+    if (currentResults.find((r) => r.winning_team_id === winningTeam.id)) {
+      // this result is already defined
+    } else {
+      //save result
+      await db.createResult({
+        matchup_round: round,
+        matchup_order_num: order,
+        winning_team_id: winningTeam.id
+      });
+    }
+
+    // get matches for this round and order
+    const predictionsForThisResult = await db.getPredictionsFor(order, round);
+
+    const correctPredictions = [];
+    const wrongPredictions = [];
+    const reasons = [];
+
+    for (const prediction of predictionsForThisResult) {
+      console.log({prediction})
+      if (prediction.winning_team_id === winningTeam.id) {
+        correctPredictions.push(prediction);
+      } else {
+        wrongPredictions.push(prediction);
+      }
+
+      if (prediction.reason) {
+        reasons.push(`**${prediction.predictor_name}:** ${prediction.reason}`);
+      }
+    }
+    console.log({reasons})
+
+    const embed = new Discord.RichEmbed();
+    embed.setColor('GOLD');
+    embed.setAuthor('Results');
+
+    const correct = correctPredictions.length ?
+      correctPredictions.map((p) => {
+        return p.predictor_name;
+      }).join(', ') :
+      '-' ;
+    embed.addField('Correct', correct);
+
+    const incorrect = wrongPredictions.length ?
+      wrongPredictions.map((p) => {
+        return p.predictor_name;
+      }).join(', ') :
+      '-';
+    embed.addField('Incorrect', incorrect);
+    embed.addField('Predictions', reasons.length ? reasons.join('\n') : '-');
+
+    return msg.channel.send(embed);
+  }
+};
+
+// $record [empty/@user]
+commandForName['record'] = {
+  admin: true,
+  execute: async (msg, args) => {
+    const mention = msg.mentions.users.first();
+
+    let user;
+    if (!mention) {
+      // self stats
+      user = await db.getUser(msg.author.id);
+    } else {
+      user = await db.getUser(mention.id);
+    }
+
+    if (!user || !user.id) {
+      return msg.channel.send('Who dat.');
+    }
+
+    const records = await db.getRecordsForUser(user.id);
+
+    const numExpectedPredictions = Math.pow(2, server_num_rounds) - 1;
+
+    if (records.length !== numExpectedPredictions) {
+      return msg.channel.send(`${user.username} has yet to complete their bracket predictions.`)
+    }
+
+    let correctCount = 0;
+    let completeCount = 0;
+    let overallWinnerName;
+    for (const record of records) {
+      if (record.result_id) {
+        completeCount++;
+
+        if (record.predicted_winner_id === record.actual_winner_id) {
+          correctCount++;
+        }
+      }
+
+      if (record.matchup_round === server_num_rounds) {
+        overallWinnerName = record.predicted_winner_name;
+      }
+    }
+
+    return msg.channel.send(`**${user.username}**: correctly predicted ${correctCount} / ${completeCount} completed games.\nTheir overall winner is: ${overallWinnerName}`);
+  }
 };
 
 function isOwner (userId) {

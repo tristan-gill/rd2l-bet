@@ -136,6 +136,27 @@ const getPredictions = async (user_id) => {
   return response.rows;
 }
 
+const getPredictionsFor = async (order, round) => {
+  const query = `
+    select
+      predictions.id as id,
+      predictor_id,
+      users.username as predictor_name,
+      matchup_round,
+      matchup_order_num,
+      winning_team_id,
+      teams.name as winning_team_name,
+      reason
+    from predictions
+    inner join teams on teams.id = winning_team_id
+    inner join users on users.id = predictor_id
+    where matchup_round = ${round} and matchup_order_num = ${order};
+  `;
+
+  const response = await pool.query(query);
+  return response.rows;
+}
+
 const createPrediction = async (prediction) => {
   const client = await pool.connect();
 
@@ -183,6 +204,57 @@ const addReason = async (prediction_id, reason) => {
   return response.rows;
 }
 
+const createResult = async (result) => {
+  const text = `
+    insert into results(matchup_round, matchup_order_num, winning_team_id)
+    values ($1, $2, $3);
+  `;
+
+  const values = Object.values(result);
+  const response = await pool.query(text, values);
+
+  return response.rows;
+}
+
+const getAllResults = async () => {
+  const query = `
+    select
+      results.id as id,
+      matchup_round,
+      matchup_order_num,
+      winning_team_id,
+      teams.name as winning_team_name
+    from results
+    inner join teams on teams.id = winning_team_id;
+  `;
+
+  const response = await pool.query(query);
+  return response.rows;
+}
+
+const getRecordsForUser = async (user_id) => {
+  const query = `
+    select
+      predictions.id as prediction_id,
+      predictor_id,
+      predictions.matchup_round,
+      predictions.matchup_order_num,
+      predictions.winning_team_id as predicted_winner_id,
+      predicted_team.name as predicted_winner_name,
+      results.id as result_id,
+      results.winning_team_id as actual_winner_id,
+      actual_team.name as actual_winner_name
+    from predictions
+    left join results on results.matchup_round = predictions.matchup_round and results.matchup_order_num = predictions.matchup_order_num
+    left join teams as predicted_team on predictions.winning_team_id = predicted_team.id
+    left join teams as actual_team on results.winning_team_id = actual_team.id
+    where predictor_id = ${user_id};
+  `;
+
+  const response = await pool.query(query);
+  return response.rows;
+}
+
 module.exports = {
   getChannels,
   getAdmin,
@@ -194,5 +266,9 @@ module.exports = {
   getPredictions,
   createPrediction,
   getMatchups,
-  addReason
+  addReason,
+  createResult,
+  getPredictionsFor,
+  getRecordsForUser,
+  getAllResults
 }

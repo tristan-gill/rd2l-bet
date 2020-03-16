@@ -55,10 +55,12 @@ const getAllMatches = async (leagueId) => {
   for (const newMatch of newMatches) {
     try {
     const match = await opendota.get(`/matches/${newMatch.id}`);
+    // console.log({match:match.players[0]})
 
     let stratzMatch = matches.find(stratz => stratz.id == match.match_id);
+    // console.log({stratzMatch:stratzMatch.players[0]})
     match.players.forEach(player => {
-      player.steamAccount = stratzMatch.players.find(stratz => stratz.steamId == player.account_id).steamAccount;
+      player.steamAccount = stratzMatch.players.find(stratz => stratz.steamAccountId == player.account_id).steamAccount;
     });
     match.regionId = stratzMatch.regionId;
     match.startDateTime = stratzMatch.startDateTime;

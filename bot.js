@@ -419,7 +419,6 @@ commandForName['results'] = {
 
 // $record [empty/@user]
 commandForName['record'] = {
-  admin: true,
   execute: async (msg, args) => {
     const mention = msg.mentions.users.first();
 

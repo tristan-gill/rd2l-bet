@@ -13,7 +13,7 @@ express().listen(PORT, () => console.log(`Listening on ${ PORT }`));
 
 const PREFIX = '$';
 
-let channels, server_num_rounds = 3, server_num_matches = 4, server_matchups;
+let channels, server_num_rounds = 6, server_num_matches = 32, server_matchups;
 
 client.once('ready', async () => {
   const cs = await db.getChannels();
@@ -151,7 +151,6 @@ function getNextPrediction (user_id, predictions) {
 // $predict
 commandForName['predict'] = {
   execute: async (msg, args) => {
-
     let user = await db.getUser(msg.author.id);
     if (!user || !user.id) {
       // create user
@@ -170,7 +169,7 @@ commandForName['predict'] = {
       await msg.author.send('I am a bot that allows you to create a prediction bracket for RD2L playoffs. I will prompt you with a matchup and you can guess the outcome. Reacting with a 1️⃣ or 2️⃣ will indicate which team you think will win. If you want to type out a reason for your prediction, which might be used as content, then react with 🅰️ for 🅱️ instead of 1️⃣ or 2️⃣ to be asked for a writeup.')
     }
     // send the prediction query
-    const message = await msg.author.send(`**Round ${predictionInfo.matchup_round} match ${predictionInfo.matchup_order_num}: ${homeTeam.name} vs ${awayTeam.name}**\n1️⃣ - ${homeTeam.name}\n2️⃣ - ${awayTeam.name}`);
+    const message = await msg.author.send(`**Round ${predictionInfo.matchup_round} match ${predictionInfo.matchup_order_num}: ${homeTeam.name} vs ${awayTeam.name}**\n1️⃣ ${homeTeam.name}\n2️⃣ ${awayTeam.name}`);
     await message.react('1️⃣');
     await message.react('2️⃣');
     await message.react('🅰️');

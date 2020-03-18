@@ -162,6 +162,10 @@ commandForName['predict'] = {
 
     const { homeTeam, awayTeam, predictionInfo, completed } = getNextPrediction(user.id, predictions)
 
+    if (predictionInfo.matchup_round === 1) {
+      return await msg.author.send('Sorry, round 1 predictions are over.');
+    }
+
     if (completed) {
       return msg.channel.send(`${msg.author.username} has completed predictions.`)
       // return msg.author.send('You have completed predictions');

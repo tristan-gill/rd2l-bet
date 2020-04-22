@@ -60,7 +60,7 @@ commandForName['join'] = {
         const embed = new Discord.RichEmbed();
         embed.setColor('GOLD');
         embed.setDescription(`${tiersString}\n\nPlayers:\n${playersString}`);
-        embed.setAuthor(`Lobby`);
+        embed.setAuthor(`Lobby - ${queue.playerIds.length}/10`);
 
         await msg.channel.send(embed);
 
@@ -74,7 +74,7 @@ commandForName['join'] = {
           for (const playerId of queue.playerIds) {
             const user = client.users.get(playerId);
 
-            const message = await user.send('**Your game is ready!**\nYou have 90 seconds to ready up by reacting to this message.');
+            const message = await user.send('**Your game is ready!**\nYou have 2 mins to ready up by reacting to this message.');
             await message.react('✅');
             await message.react('❌');
 
@@ -160,7 +160,7 @@ commandForName['lobby'] = {
 
     //cleanup old lobbies
     queues = queues.filter((queue) => {
-      return ['queue', 'readyCheck']
+      return ['queue', 'readyCheck'].includes(queue.state);
     });
 
     if (msg.channel instanceof Discord.DMChannel) {
@@ -241,16 +241,14 @@ commandForName['help'] = {
   execute: async (msg, args) => {
     const embed = new Discord.RichEmbed();
     embed.setColor('GOLD');
-    embed.setDescription('This bot is here to help players organize lobbies outside the scheduled times. Similar to the normal dota queue you can join a queue and wait for enough players. When 10 people have queued up, a DM will be sent to each player as a ready check. You have 90 seconds to ready up. Once all players have readied up, the bot will tag all the players and it\'s up to them to start the lobby.');
+    embed.setDescription('This bot is here to help players organize lobbies outside the scheduled times. Similar to the normal dota queue you can join a queue and wait for enough players. When 10 people have queued up, a DM will be sent to each player as a ready check. You have 2 mins to ready up. Once all players have readied up, the bot will tag all the players and it\'s up to them to start the lobby.');
     embed.setAuthor(`Lobby Bot`);
 
     embed.addField('!join', 'Join the lobby, dictated by your tier. If no lobby exists this will do nothing.');
     embed.addField('!lobby [add/remove/view/ ] [1 3]', "Only coaches can start a lobby (for now). Commands for starting, stopping and viewing the current lobbies.\n`!lobby add 1 3` - starts a lobby for tiers 1 and 3\n`!lobby remove 1 3` - removes the lobby for tiers 1 and 3\n`!lobby` or `!lobby view` - view the current lobbies");
     embed.addField('!leave', 'Removes yourself from all lobbies. You can DM the bot if you\'re timed out from the lobby chat.');
 
-    await msg.channel.send(embed);
-
-    msg.channel.send('You have been removed from the queue.');
+    return msg.channel.send(embed);
   }
 }
 

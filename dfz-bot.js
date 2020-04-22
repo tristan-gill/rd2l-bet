@@ -122,7 +122,7 @@ commandForName['join'] = {
                   e.setDescription(`${tiersString}\n\nPlayers:\n${queue.playerIds.map((playerId) => {
                     return `<@${playerId}>`;
                   }).join(' ')}`);
-                  e.setAuthor(`Lobby`);
+                  e.setAuthor(`Lobby - ${queue.playerIds.length}/10`);
                   await msg.channel.send(e);
                 }
               }
@@ -189,7 +189,7 @@ commandForName['lobby'] = {
         const embed = new Discord.RichEmbed();
         embed.setColor('GOLD');
         embed.setDescription(`${tiersString}\n\nPlayers:\n${playersString}`);
-        embed.setAuthor(`Lobby`);
+        embed.setAuthor(`Lobby - ${queue.playerIds.length}/10`);
 
         await msg.channel.send(embed);
       }

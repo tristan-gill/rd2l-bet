@@ -6,6 +6,7 @@ const client = new Discord.Client();
 const PREFIX = '!';
 
 const queuableRoles = [process.env.COACH, process.env.TIER_ONE, process.env.TIER_TWO, process.env.TIER_THREE, process.env.TIER_GRAD];
+const emojiNumbers = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 
 let queues;
 
@@ -24,7 +25,8 @@ queue {
   playerIds: [],
   coachIds: [],
   readyUps: 0,
-  state: 'queue', 'readyCheck', 'started', 'failed'
+  state: 'queue', 'readyCheck', 'started', 'failed',
+  region: ''
 }
 */
 
@@ -47,6 +49,10 @@ commandForName['join'] = {
           return msg.channel.send('You are already in a lobby.');
         }
 
+        if (queue.playerIds.length >= 10) {
+          continue;
+        }
+
         queue.playerIds.push(msg.author.id);
 
         const tiersString = queue.tiers.map((tier) => {
@@ -57,12 +63,10 @@ commandForName['join'] = {
           return `<@${playerId}>`;
         }).join(' ');
 
-        const embed = new Discord.RichEmbed();
-        embed.setColor('GOLD');
-        embed.setDescription(`${tiersString}\n\nPlayers:\n${playersString}`);
-        embed.setAuthor(`Lobby - ${queue.playerIds.length}/10`);
+        await msg.react(emojiNumbers[queue.playerIds.length]);
 
-        await msg.channel.send(embed);
+        // send a dm to them explaining shit
+        await msg.author.send('You just joined the queue for the lobby. When the 10th person joins the queue, the lobby will be ready. I will DM you again with a ready check to which you must react.\n\n**Similar to Dota\'s queue, you will have 2 minutes to ready up. If you miss this ready check you will be removed from the queue.**\n\nIf you accidentally joined or are not prepared to wait for a game, you can reply to me with `!leave` to leave the queue.');
 
         if (queue.playerIds.length >= 10) {
           // queue is full, begin the process
@@ -122,7 +126,7 @@ commandForName['join'] = {
                   e.setDescription(`${tiersString}\n\nPlayers:\n${queue.playerIds.map((playerId) => {
                     return `<@${playerId}>`;
                   }).join(' ')}`);
-                  e.setAuthor(`Lobby - ${queue.playerIds.length}/10`);
+                  e.setAuthor(`${queue.region} Lobby - ${queue.playerIds.length}/10`);
                   await msg.channel.send(e);
                 }
               }
@@ -154,7 +158,7 @@ commandForName['leave'] = {
   }
 }
 
-// $lobby [add/remove/view] [1 2 3 4]
+// $lobby [add/remove/view] [region] [1 2 3 4]
 commandForName['lobby'] = {
   execute: async (msg, args) => {
 
@@ -166,8 +170,6 @@ commandForName['lobby'] = {
     if (msg.channel instanceof Discord.DMChannel) {
       return;
     }
-
-    const isCoach = msg.member.roles.some((role) => role.id === process.env.COACH);
 
     const action = args[0];
 
@@ -189,19 +191,30 @@ commandForName['lobby'] = {
         const embed = new Discord.RichEmbed();
         embed.setColor('GOLD');
         embed.setDescription(`${tiersString}\n\nPlayers:\n${playersString}`);
-        embed.setAuthor(`Lobby - ${queue.playerIds.length}/10`);
+        embed.setAuthor(`${queue.region} Lobby - ${queue.playerIds.length}/10`);
 
         await msg.channel.send(embed);
       }
       return;
     }
 
-    if (!isCoach) {
+    const isCoach = msg.member.roles.some((role) => role.id === process.env.COACH);
+
+    if (!isCoach && msg.channel.id !== process.env.DFZ_COACHES_CHANNEL) {
       return msg.channel.send('Sorry, only coaches can manage lobbies.');
     }
 
     // parse tiers
-    const tiersString = args.slice(1);
+    const region = args[1];
+
+    // gross
+    let tierString;
+    if (action === 'add') {
+      tiersString = args.slice(2);
+    } else if (action === 'remove') {
+      tiersString = args.slice(1);
+    }
+
     const tiers = [];
     for (const tierString of tiersString) {
       const tier = parseInt(tierString);
@@ -218,9 +231,20 @@ commandForName['lobby'] = {
         tiers,
         playerIds: [],
         coachIds: [msg.author.id],
-        state: 'queue'
+        state: 'queue',
+        region
       });
-      return msg.channel.send('New lobby started.');
+
+      const tiersEmbed = tiers.map((tier) => {
+        return `<@&${tier}>`;
+      }).join(' ');
+
+      const embed = new Discord.RichEmbed();
+      embed.setColor('GOLD');
+      embed.setDescription(`${tiersEmbed}\n\nPlayers:\n`);
+      embed.setAuthor(`${region} Lobby - 0/10`);
+
+      return msg.channel.send(embed);
     } else if (action === 'remove') {
       // look for a queue with the same tiers
       // use a shitty array equals for simplicity
@@ -245,7 +269,7 @@ commandForName['help'] = {
     embed.setAuthor(`Lobby Bot`);
 
     embed.addField('!join', 'Join the lobby, dictated by your tier. If no lobby exists this will do nothing.');
-    embed.addField('!lobby [add/remove/view/ ] [1 3]', "Only coaches can start a lobby (for now). Commands for starting, stopping and viewing the current lobbies.\n`!lobby add 1 3` - starts a lobby for tiers 1 and 3\n`!lobby remove 1 3` - removes the lobby for tiers 1 and 3\n`!lobby` or `!lobby view` - view the current lobbies");
+    embed.addField('!lobby [add/remove/view/ ] [region] [1 3]', "Only coaches can start a lobby (for now). Commands for starting, stopping and viewing the current lobbies.\n`!lobby add NA 1 3` - starts a lobby for tiers 1 and 3\n`!lobby remove 1 3` - removes the lobby for tiers 1 and 3\n`!lobby` or `!lobby view` - view the current lobbies");
     embed.addField('!leave', 'Removes yourself from all lobbies. You can DM the bot if you\'re timed out from the lobby chat.');
 
     return msg.channel.send(embed);

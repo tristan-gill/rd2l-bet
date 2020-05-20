@@ -331,9 +331,16 @@ commandForName['post'] = {
       text: freeText
     };
 
-    const embed = generateEmbed(lobby)
+    const channel = await client.channels.get(process.env.DFZ_LOBBY_CHANNEL);
 
-    const message = await client.channels.get(process.env.DFZ_LOBBY_CHANNEL).send(embed);
+    const tiersString = tiers.map((tier) => {
+      return `<@&${tier}>`;
+    }).join(' ');
+
+    await channel.send(`**New scheduled lobby!**\nReact to the message below with the number(s) corresponding to the roles you would like to play.\n${tiersString}`);
+
+    const embed = generateEmbed(lobby);
+    const message = await channel.send(embed);
     await message.react('1️⃣');
     await message.react('2️⃣');
     await message.react('3️⃣');
@@ -483,15 +490,15 @@ client.on('messageReactionAdd', async (reaction, user) => {
 
   // if is a coach
   const isCoach = guildUser.roles.some((role) => role.id === process.env.COACH);
-  if (isCoach) {
+  const isAdmin = guildUser.roles.some((role) => role.id === process.env.DFZ_ADMIN);
+  console.log({isCoach, isAdmin, emoji: reaction.emoji.name})
+  if (isCoach || isAdmin) {
     if (reaction.emoji.name === '✅') {
       // remind
-      const lobbyNumber = lobbies.indexOf(lobby) + 1;
-
       for (let l = 0; l < lobby.fields.length; l++) {
         if (lobby.fields[l].length >= 10) {
           // soft cap on three vc rooms
-          const voiceChannelIndex = Math.min(voiceChannels.length, lobbyNumber + l) - 1;
+          const voiceChannelIndex = Math.min(voiceChannels.length, l) - 1;
           const voiceChannel = await client.channels.get(voiceChannels[voiceChannelIndex]).createInvite();
 
           await user.send(`**Lobby reminder!**\nHead over to the voice channel: ${voiceChannel.url}`);
@@ -506,7 +513,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
       return reaction.remove(user);
     } else if (reaction.emoji.name === '🗒️') {
       // print
-      await client.channels.get(process.env.DFZ_COACHES_CHANNEL).send(getPostPrintString(lobby));
+      await user.send(getPostPrintString(lobby));
       return reaction.remove(user);
     } else {
       return reaction.remove(user);
@@ -526,7 +533,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
   }
 
   if (!lobby) {
-    return;
+    return reaction.remove(user);
   }
 
   // if already signed up, update roles
@@ -674,13 +681,14 @@ function generateEmbed (lobby) {
     playerCount += playerList.length;
   }
 
+  const tiersString = lobby.tiers.map((tier) => {
+    return `<@&${tier}>`;
+  }).join(' ');
+
   const embed = new Discord.RichEmbed();
   embed.setColor('GOLD');
   embed.setAuthor(`${lobby.text} - (${playerCount})`);
-
-  embed.addField('Tiers', lobby.tiers.map((tier) => {
-    return `<@&${tier}>`;
-  }).join(' '));
+  embed.setDescription(`Tiers: ${tiersString}`);
 
   for (let i = 0; i < lobby.fields.length; i++) {
     if (lobby.fields[i].length < 1) {

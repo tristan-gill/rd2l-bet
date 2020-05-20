@@ -8,7 +8,7 @@ const PREFIX = '!';
 
 const queuableRoles = [process.env.COACH, process.env.TIER_ONE, process.env.TIER_TWO, process.env.TIER_THREE, process.env.TIER_GRAD];
 const emojiNumbers = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
-const voiceChannels = [process.env.DFZ_VC_1, process.env.DFZ_VC_2, process.env.DFZ_VC_3];
+const voiceChannels = [process.env.DFZ_VC_1, process.env.DFZ_VC_2, process.env.DFZ_VC_3, process.env.DFZ_VC_4];
 
 let queues, lobbies;
 
@@ -495,10 +495,16 @@ client.on('messageReactionAdd', async (reaction, user) => {
   if (isCoach || isAdmin) {
     if (reaction.emoji.name === '✅') {
       // remind
+      let lobbyNumber = lobbies.indexOf(lobby) + 1;
+
+      if (lobbyNumber === 2 && lobbies[0].fields.length > 1 && lobbies[0].fields[1].length >= 10) {
+        lobbyNumber++;
+      }
+
       for (let l = 0; l < lobby.fields.length; l++) {
         if (lobby.fields[l].length >= 10) {
           // soft cap on three vc rooms
-          const voiceChannelIndex = Math.min(voiceChannels.length, l + 1) - 1;
+          const voiceChannelIndex = Math.min(voiceChannels.length, lobbyNumber + l) - 1;
           const voiceChannel = await client.channels.get(voiceChannels[voiceChannelIndex]).createInvite();
 
           await user.send(`**Lobby reminder!**\nHead over to the voice channel: ${voiceChannel.url}`);

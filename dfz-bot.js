@@ -491,14 +491,14 @@ client.on('messageReactionAdd', async (reaction, user) => {
   // if is a coach
   const isCoach = guildUser.roles.some((role) => role.id === process.env.COACH);
   const isAdmin = guildUser.roles.some((role) => role.id === process.env.DFZ_ADMIN);
-  console.log({isCoach, isAdmin, emoji: reaction.emoji.name})
+
   if (isCoach || isAdmin) {
     if (reaction.emoji.name === '✅') {
       // remind
       for (let l = 0; l < lobby.fields.length; l++) {
         if (lobby.fields[l].length >= 10) {
           // soft cap on three vc rooms
-          const voiceChannelIndex = Math.min(voiceChannels.length, l) - 1;
+          const voiceChannelIndex = Math.min(voiceChannels.length, l + 1) - 1;
           const voiceChannel = await client.channels.get(voiceChannels[voiceChannelIndex]).createInvite();
 
           await user.send(`**Lobby reminder!**\nHead over to the voice channel: ${voiceChannel.url}`);

@@ -341,6 +341,11 @@ commandForName['post'] = {
 
     const embed = generateEmbed(lobby);
     const message = await channel.send(embed);
+
+    lobby.id = message.id;
+
+    lobbies.push(lobby);
+
     await message.react('1️⃣');
     await message.react('2️⃣');
     await message.react('3️⃣');
@@ -348,10 +353,6 @@ commandForName['post'] = {
     await message.react('5️⃣');
     await message.react('✅');
     await message.react('🗒️');
-
-    lobby.id = message.id;
-
-    lobbies.push(lobby);
   }
 }
 

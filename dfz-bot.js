@@ -289,6 +289,7 @@ lobby = {
   fields: [[]]
   players: []
   tiers: []
+  locked: false
 }
 
 player = {
@@ -328,7 +329,8 @@ commandForName['post'] = {
         []
       ],
       tiers,
-      text: freeText
+      text: freeText,
+      locked: false
     };
 
     const channel = await client.channels.get(process.env.DFZ_LOBBY_CHANNEL);
@@ -353,6 +355,7 @@ commandForName['post'] = {
     await message.react('5️⃣');
     await message.react('✅');
     await message.react('🗒️');
+    await message.react('🔒');
   }
 }
 
@@ -522,6 +525,14 @@ client.on('messageReactionAdd', async (reaction, user) => {
       // print
       await user.send(getPostPrintString(lobby));
       return reaction.remove(user);
+    } else if (reaction.emoji.name === '🔒') {
+      // lock future reactions
+      lobby.locked = !lobby.locked;
+
+      const embed = generateEmbed(lobby);
+      await reaction.message.edit(embed);
+
+      return reaction.remove(user);
     } else {
       return reaction.remove(user);
     }
@@ -540,6 +551,10 @@ client.on('messageReactionAdd', async (reaction, user) => {
   }
 
   if (!lobby) {
+    return reaction.remove(user);
+  }
+
+  if (lobby.locked) {
     return reaction.remove(user);
   }
 
@@ -692,9 +707,11 @@ function generateEmbed (lobby) {
     return `<@&${tier}>`;
   }).join(' ');
 
+  const lockedString = lobby.locked ? '🔒 ' : '';
+
   const embed = new Discord.RichEmbed();
   embed.setColor('GOLD');
-  embed.setAuthor(`${lobby.text} - (${playerCount})`);
+  embed.setAuthor(`${lockedString}${lobby.text} - (${playerCount})`);
   embed.setDescription(`Tiers: ${tiersString}`);
 
   for (let i = 0; i < lobby.fields.length; i++) {

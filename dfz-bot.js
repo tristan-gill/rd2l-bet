@@ -489,6 +489,10 @@ client.on('messageReactionAdd', async (reaction, user) => {
 
   const lobby = lobbies.find((lobby) => lobby.id === reaction.message.id);
 
+  if (!lobby) {
+    return;
+  }
+
   const guildUser = await reaction.message.channel.guild.fetchMember(user.id);
   const tier = guildUser.roles.find((role) => queuableRoles.includes(role.id));
 

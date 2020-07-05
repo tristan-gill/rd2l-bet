@@ -6,7 +6,7 @@ const moment = require('moment');
 
 const PREFIX = '!';
 
-const queuableRoles = [process.env.COACH, process.env.TIER_ONE, process.env.TIER_TWO, process.env.TIER_THREE, process.env.TIER_GRAD];
+const queuableRoles = [process.env.COACH, process.env.TIER_ONE, process.env.TIER_TWO, process.env.TIER_THREE, process.env.TIER_FOUR, process.env.TIER_GRAD];
 const emojiNumbers = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
 const voiceChannels = [process.env.DFZ_VC_1, process.env.DFZ_VC_2, process.env.DFZ_VC_3, process.env.DFZ_VC_4];
 
@@ -225,7 +225,7 @@ commandForName['queue'] = {
     for (const tierString of tiersString) {
       const tier = parseInt(tierString);
 
-      if (isNaN(tier) || tier < 1 || tier > 4) {
+      if (isNaN(tier) || tier < 1 || tier > 5) {
         return msg.channel.send('Sorry, wrong format for command');
       }
 
@@ -300,7 +300,7 @@ player = {
 }
 */
 
-//!post 1234 [NA 9:00pm EDT]
+//!post 12345 [NA 9:00pm EDT]
 commandForName['post'] = {
   execute: async (msg, args) => {
     if (msg.channel instanceof Discord.DMChannel) {
@@ -317,8 +317,8 @@ commandForName['post'] = {
     const tiers = [];
     for (const tierString of tiersJoined) {
       const tier = parseInt(tierString);
-      if (isNaN(tier) || tier < 1 || tier > 4) {
-        return msg.channel.send('Incorrect format: \`!post 1234 [free text fields]\`');
+      if (isNaN(tier) || tier < 1 || tier > 5) {
+        return msg.channel.send('Incorrect format: \`!post 12345 [free text fields]\`');
       }
 
       tiers.push(queuableRoles[tier]);
@@ -356,39 +356,6 @@ commandForName['post'] = {
     await message.react('✅');
     await message.react('🗒️');
     await message.react('🔒');
-  }
-}
-
-//!print [post number]
-commandForName['print'] = {
-  execute: async (msg, args) => {
-    if (msg.channel instanceof Discord.DMChannel) {
-      return;
-    }
-    const isCoach = msg.member.roles.some((role) => role.id === process.env.COACH);
-    if (!isCoach && msg.channel.id !== process.env.DFZ_COACHES_CHANNEL) {
-      return msg.channel.send('Sorry, only coaches can manage this.');
-    }
-
-    let lobbyNumber = args[0];
-
-    if (lobbies.length < 1) {
-      return msg.channel.send('No lobbies.');
-    }
-
-    if (!lobbyNumber) {
-      lobbyNumber = 1;
-    } else {
-      lobbyNumber = parseInt(lobbyNumber);
-    }
-
-    if (lobbyNumber > lobbies.length || lobbyNumber < 1) {
-      return msg.channel.send('Idk what post that is.');
-    }
-
-    const lobby = lobbies[lobbyNumber - 1];
-
-    return msg.channel.send(getPostPrintString(lobby));
   }
 }
 
@@ -433,53 +400,6 @@ function getPostPrintString (lobby) {
   }
 
   return lobbyStrings.join('');
-}
-
-//!remind [post number] [] []
-commandForName['remind'] = {
-  execute: async (msg, args) => {
-    if (msg.channel instanceof Discord.DMChannel) {
-      return;
-    }
-    const isCoach = msg.member.roles.some((role) => role.id === process.env.COACH);
-    if (!isCoach && msg.channel.id !== process.env.DFZ_COACHES_CHANNEL) {
-      return msg.channel.send('Sorry, only coaches can manage this.');
-    }
-
-    let lobbyNumber = args[0];
-
-    if (lobbies.length < 1) {
-      return msg.channel.send('No posts.');
-    }
-
-    if (!lobbyNumber) {
-      lobbyNumber = 1;
-    } else {
-      lobbyNumber = parseInt(lobbyNumber);
-    }
-
-    if (lobbyNumber > lobbies.length || lobbyNumber < 1) {
-      return msg.channel.send('Idk what post that is.');
-    }
-
-    const lobby = lobbies[lobbyNumber - 1];
-
-    for (let l = 0; l < lobby.fields.length; l++) {
-      if (lobby.fields[l].length >= 10) {
-        // soft cap on three vc rooms
-        const voiceChannelIndex = Math.min(voiceChannels.length, lobbyNumber + l) - 1;
-        const voiceChannel = await client.channels.get(voiceChannels[voiceChannelIndex]).createInvite();
-
-        await msg.author.send(`**Lobby reminder!**\nHead over to the voice channel: ${voiceChannel.url}`);
-
-        for (const player of lobby.fields[l]) {
-          const user = client.users.get(player.id);
-
-          await user.send(`**Lobby reminder!**\nHead over to the voice channel: ${voiceChannel.url}`);
-        }
-      }
-    }
-  }
 }
 
 client.on('messageReactionAdd', async (reaction, user) => {
@@ -580,6 +500,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
   await addToLobby(lobby, user, reaction, tier, positionNumber);
 });
 
+// no nice event handler for reaction removal, raw looks at all discord events
 client.on('raw', async (event) => {
   if (event.t === 'MESSAGE_REACTION_REMOVE') {
     const { d: data } = event;
@@ -629,8 +550,6 @@ async function addToLobby (lobby, user, reaction, tier, positionNumber) {
     signupTime: moment(),
     roles: [positionNumber]
   };
-
-  // determine which field they go in
 
   // which field they are going into
   let fieldIndex = lobby.fields.findIndex((playerList) => playerList.length < 10);
